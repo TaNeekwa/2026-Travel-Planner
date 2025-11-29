@@ -477,6 +477,7 @@ function TripForm({ trip, onSave, onCancel }) {
                 <option value="MXN">MXN - Mexican Peso</option>
                 <option value="BRL">BRL - Brazilian Real</option>
                 <option value="INR">INR - Indian Rupee</option>
+                <option value="NGN">NGN - Nigerian Naira (₦)</option>
               </select>
               <small>Currency for all costs in this trip</small>
             </div>
