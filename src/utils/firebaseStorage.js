@@ -9,7 +9,6 @@ import {
   deleteDoc,
   query,
   orderBy,
-  serverTimestamp,
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
@@ -63,13 +62,17 @@ export const addTrip = async (userId, trip) => {
     const tripsCollection = getTripsCollection(userId);
     console.log('Firebase addTrip - collection path:', `users/${userId}/trips`);
 
+    // Use regular timestamps instead of serverTimestamp() to avoid hanging
+    const timestamp = new Date().toISOString();
     const newTrip = {
       ...trip,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
+      createdAt: timestamp,
+      updatedAt: timestamp,
     };
 
     console.log('Firebase addTrip - about to call addDoc...');
+    console.log('Firebase addTrip - newTrip object:', newTrip);
+
     const docRef = await addDoc(tripsCollection, newTrip);
     console.log('Firebase addTrip - docRef created:', docRef.id);
 
@@ -77,8 +80,6 @@ export const addTrip = async (userId, trip) => {
     return {
       id: docRef.id,
       ...newTrip,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     };
   } catch (error) {
     console.error('Error adding trip to Firebase:', error);
@@ -98,7 +99,7 @@ export const updateTrip = async (userId, tripId, updates) => {
 
     const updateData = {
       ...updates,
-      updatedAt: serverTimestamp(),
+      updatedAt: new Date().toISOString(),
     };
 
     await updateDoc(tripRef, updateData);
