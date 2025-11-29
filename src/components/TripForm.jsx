@@ -269,10 +269,15 @@ function TripForm({ trip, onSave, onCancel }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log('Form submitted!', formData);
+
     if (!formData.name || !formData.startDate || !formData.endDate) {
+      console.log('Validation failed:', { name: formData.name, startDate: formData.startDate, endDate: formData.endDate });
       alert('Please fill in the required fields: Trip Name, Start Date, and End Date');
       return;
     }
+
+    console.log('Calling onSave with:', formData);
     onSave(formData);
   };
 

@@ -58,12 +58,15 @@ function App() {
 
   const handleAddTrip = async (tripData) => {
     try {
+      console.log('Adding trip:', tripData);
       const newTrip = await addTrip(currentUser.uid, tripData);
+      console.log('Trip added successfully:', newTrip);
       setTrips([...trips, newTrip]);
       setCurrentView('dashboard');
     } catch (error) {
       console.error('Error adding trip:', error);
-      alert('Failed to add trip. Please try again.');
+      console.error('Error details:', error.message, error.code);
+      alert(`Failed to add trip: ${error.message}. Please check the console for details.`);
     }
   };
 
