@@ -85,7 +85,13 @@ export const addTrip = async (userId, trip) => {
     console.log('Firebase addTrip - collection path: trips (flat structure)');
     console.log('Firebase addTrip - about to call addDoc...');
 
-    const docRef = await addDoc(tripsCollection, newTrip);
+    // Add a timeout to detect if addDoc is hanging
+    const addDocPromise = addDoc(tripsCollection, newTrip);
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('addDoc timed out after 10 seconds - possible permissions or connection issue')), 10000)
+    );
+
+    const docRef = await Promise.race([addDocPromise, timeoutPromise]);
     console.log('Firebase addTrip - SUCCESS! docRef created:', docRef.id);
 
     // Return the trip with the new ID
