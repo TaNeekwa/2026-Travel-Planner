@@ -1,22 +1,5 @@
-// Firebase Firestore utility functions for managing travel data
-import {
-  collection,
-  doc,
-  getDocs,
-  getDoc,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  query,
-  orderBy,
-} from 'firebase/firestore';
-import { db } from '../firebase/config';
-
-// Get the trips collection reference for a specific user
-const getTripsCollection = (userId) => {
-  if (!userId) throw new Error('User ID is required');
-  return collection(db, 'users', userId, 'trips');
-};
+// Storage utility functions for managing travel data
+// Using localStorage for simple, fast, browser-based storage
 
 // Load all trips for the current user
 export const loadTrips = async (userId) => {
@@ -26,29 +9,17 @@ export const loadTrips = async (userId) => {
       return [];
     }
 
-    // Use flat collection structure and filter by userId
-    const tripsCollection = collection(db, 'trips');
-    const q = query(
-      tripsCollection,
-      orderBy('createdAt', 'desc')
-    );
-    const querySnapshot = await getDocs(q);
+    // Load trips from localStorage
+    const storageKey = `trips_${userId}`;
+    const trips = JSON.parse(localStorage.getItem(storageKey) || '[]');
 
-    const trips = [];
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      // Only include trips for this user
-      if (data.userId === userId) {
-        trips.push({
-          id: doc.id,
-          ...data,
-        });
-      }
-    });
+    // Sort by created date, newest first
+    trips.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
+    console.log('Trips loaded from localStorage:', trips.length);
     return trips;
   } catch (error) {
-    console.error('Error loading trips from Firebase:', error);
+    console.error('Error loading trips:', error);
     return [];
   }
 };
@@ -64,46 +35,32 @@ export const addTrip = async (userId, trip) => {
   try {
     if (!userId) throw new Error('User ID is required');
 
-    console.log('Firebase addTrip - userId:', userId);
-    console.log('Firebase addTrip - trip data:', trip);
-    console.log('Firebase addTrip - db object:', db);
-
-    // Use regular timestamps instead of serverTimestamp() to avoid hanging
+    // Use regular timestamps
     const timestamp = new Date().toISOString();
+    const tripId = `trip_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
     const newTrip = {
       ...trip,
-      userId: userId, // Add userId to the document
+      id: tripId,
+      userId: userId,
       createdAt: timestamp,
       updatedAt: timestamp,
     };
 
-    console.log('Firebase addTrip - newTrip object:', newTrip);
+    // Get existing trips from localStorage
+    const storageKey = `trips_${userId}`;
+    const existingTrips = JSON.parse(localStorage.getItem(storageKey) || '[]');
 
-    // Try using a flat collection structure instead of subcollections
-    // This helps isolate if the issue is with subcollections
-    const tripsCollection = collection(db, 'trips');
-    console.log('Firebase addTrip - collection path: trips (flat structure)');
-    console.log('Firebase addTrip - about to call addDoc...');
+    // Add new trip
+    existingTrips.push(newTrip);
 
-    // Add a timeout to detect if addDoc is hanging
-    const addDocPromise = addDoc(tripsCollection, newTrip);
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('addDoc timed out after 10 seconds - possible permissions or connection issue')), 10000)
-    );
+    // Save back to localStorage
+    localStorage.setItem(storageKey, JSON.stringify(existingTrips));
 
-    const docRef = await Promise.race([addDocPromise, timeoutPromise]);
-    console.log('Firebase addTrip - SUCCESS! docRef created:', docRef.id);
-
-    // Return the trip with the new ID
-    return {
-      id: docRef.id,
-      ...newTrip,
-    };
+    console.log('Trip saved to localStorage:', newTrip);
+    return newTrip;
   } catch (error) {
-    console.error('Error adding trip to Firebase:', error);
-    console.error('Error code:', error.code);
-    console.error('Error message:', error.message);
-    console.error('Error stack:', error.stack);
+    console.error('Error adding trip:', error);
     throw error;
   }
 };
@@ -114,24 +71,27 @@ export const updateTrip = async (userId, tripId, updates) => {
     if (!userId) throw new Error('User ID is required');
     if (!tripId) throw new Error('Trip ID is required');
 
-    // Use flat collection structure
-    const tripRef = doc(db, 'trips', tripId);
+    // Load trips from localStorage
+    const storageKey = `trips_${userId}`;
+    const trips = JSON.parse(localStorage.getItem(storageKey) || '[]');
 
-    const updateData = {
+    // Find and update the trip
+    const tripIndex = trips.findIndex(t => t.id === tripId);
+    if (tripIndex === -1) throw new Error('Trip not found');
+
+    trips[tripIndex] = {
+      ...trips[tripIndex],
       ...updates,
       updatedAt: new Date().toISOString(),
     };
 
-    await updateDoc(tripRef, updateData);
+    // Save back to localStorage
+    localStorage.setItem(storageKey, JSON.stringify(trips));
 
-    // Return the updated trip
-    return {
-      id: tripId,
-      ...updates,
-      updatedAt: new Date().toISOString(),
-    };
+    console.log('Trip updated in localStorage:', trips[tripIndex]);
+    return trips[tripIndex];
   } catch (error) {
-    console.error('Error updating trip in Firebase:', error);
+    console.error('Error updating trip:', error);
     throw error;
   }
 };
@@ -142,13 +102,20 @@ export const deleteTrip = async (userId, tripId) => {
     if (!userId) throw new Error('User ID is required');
     if (!tripId) throw new Error('Trip ID is required');
 
-    // Use flat collection structure
-    const tripRef = doc(db, 'trips', tripId);
-    await deleteDoc(tripRef);
+    // Load trips from localStorage
+    const storageKey = `trips_${userId}`;
+    const trips = JSON.parse(localStorage.getItem(storageKey) || '[]');
 
+    // Filter out the trip to delete
+    const updatedTrips = trips.filter(t => t.id !== tripId);
+
+    // Save back to localStorage
+    localStorage.setItem(storageKey, JSON.stringify(updatedTrips));
+
+    console.log('Trip deleted from localStorage');
     return true;
   } catch (error) {
-    console.error('Error deleting trip from Firebase:', error);
+    console.error('Error deleting trip:', error);
     throw error;
   }
 };
@@ -159,26 +126,17 @@ export const getTripById = async (userId, tripId) => {
     if (!userId) throw new Error('User ID is required');
     if (!tripId) throw new Error('Trip ID is required');
 
-    // Use flat collection structure
-    const tripRef = doc(db, 'trips', tripId);
-    const docSnap = await getDoc(tripRef);
+    // Load trips from localStorage
+    const storageKey = `trips_${userId}`;
+    const trips = JSON.parse(localStorage.getItem(storageKey) || '[]');
 
-    if (docSnap.exists()) {
-      const data = docSnap.data();
-      // Verify this trip belongs to the user
-      if (data.userId === userId) {
-        return {
-          id: docSnap.id,
-          ...data,
-        };
-      } else {
-        return null; // Trip doesn't belong to this user
-      }
-    } else {
-      return null;
-    }
+    // Find the trip
+    const trip = trips.find(t => t.id === tripId);
+
+    console.log('Trip retrieved from localStorage:', trip);
+    return trip || null;
   } catch (error) {
-    console.error('Error getting trip from Firebase:', error);
+    console.error('Error getting trip:', error);
     return null;
   }
 };
