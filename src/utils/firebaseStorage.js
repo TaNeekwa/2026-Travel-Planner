@@ -26,16 +26,24 @@ export const loadTrips = async (userId) => {
       return [];
     }
 
-    const tripsCollection = getTripsCollection(userId);
-    const q = query(tripsCollection, orderBy('createdAt', 'desc'));
+    // Use flat collection structure and filter by userId
+    const tripsCollection = collection(db, 'trips');
+    const q = query(
+      tripsCollection,
+      orderBy('createdAt', 'desc')
+    );
     const querySnapshot = await getDocs(q);
 
     const trips = [];
     querySnapshot.forEach((doc) => {
-      trips.push({
-        id: doc.id,
-        ...doc.data(),
-      });
+      const data = doc.data();
+      // Only include trips for this user
+      if (data.userId === userId) {
+        trips.push({
+          id: doc.id,
+          ...data,
+        });
+      }
     });
 
     return trips;
@@ -58,23 +66,27 @@ export const addTrip = async (userId, trip) => {
 
     console.log('Firebase addTrip - userId:', userId);
     console.log('Firebase addTrip - trip data:', trip);
-
-    const tripsCollection = getTripsCollection(userId);
-    console.log('Firebase addTrip - collection path:', `users/${userId}/trips`);
+    console.log('Firebase addTrip - db object:', db);
 
     // Use regular timestamps instead of serverTimestamp() to avoid hanging
     const timestamp = new Date().toISOString();
     const newTrip = {
       ...trip,
+      userId: userId, // Add userId to the document
       createdAt: timestamp,
       updatedAt: timestamp,
     };
 
-    console.log('Firebase addTrip - about to call addDoc...');
     console.log('Firebase addTrip - newTrip object:', newTrip);
 
+    // Try using a flat collection structure instead of subcollections
+    // This helps isolate if the issue is with subcollections
+    const tripsCollection = collection(db, 'trips');
+    console.log('Firebase addTrip - collection path: trips (flat structure)');
+    console.log('Firebase addTrip - about to call addDoc...');
+
     const docRef = await addDoc(tripsCollection, newTrip);
-    console.log('Firebase addTrip - docRef created:', docRef.id);
+    console.log('Firebase addTrip - SUCCESS! docRef created:', docRef.id);
 
     // Return the trip with the new ID
     return {
@@ -85,6 +97,7 @@ export const addTrip = async (userId, trip) => {
     console.error('Error adding trip to Firebase:', error);
     console.error('Error code:', error.code);
     console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
     throw error;
   }
 };
@@ -95,7 +108,8 @@ export const updateTrip = async (userId, tripId, updates) => {
     if (!userId) throw new Error('User ID is required');
     if (!tripId) throw new Error('Trip ID is required');
 
-    const tripRef = doc(db, 'users', userId, 'trips', tripId);
+    // Use flat collection structure
+    const tripRef = doc(db, 'trips', tripId);
 
     const updateData = {
       ...updates,
@@ -122,7 +136,8 @@ export const deleteTrip = async (userId, tripId) => {
     if (!userId) throw new Error('User ID is required');
     if (!tripId) throw new Error('Trip ID is required');
 
-    const tripRef = doc(db, 'users', userId, 'trips', tripId);
+    // Use flat collection structure
+    const tripRef = doc(db, 'trips', tripId);
     await deleteDoc(tripRef);
 
     return true;
@@ -138,14 +153,21 @@ export const getTripById = async (userId, tripId) => {
     if (!userId) throw new Error('User ID is required');
     if (!tripId) throw new Error('Trip ID is required');
 
-    const tripRef = doc(db, 'users', userId, 'trips', tripId);
+    // Use flat collection structure
+    const tripRef = doc(db, 'trips', tripId);
     const docSnap = await getDoc(tripRef);
 
     if (docSnap.exists()) {
-      return {
-        id: docSnap.id,
-        ...docSnap.data(),
-      };
+      const data = docSnap.data();
+      // Verify this trip belongs to the user
+      if (data.userId === userId) {
+        return {
+          id: docSnap.id,
+          ...data,
+        };
+      } else {
+        return null; // Trip doesn't belong to this user
+      }
     } else {
       return null;
     }
