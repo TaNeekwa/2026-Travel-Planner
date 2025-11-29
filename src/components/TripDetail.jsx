@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import WeatherWidget from './WeatherWidget';
+import { getCoordinates } from '../utils/geocoding';
 import {
   calculateTripTotal,
   calculateTotalPaid,
@@ -86,9 +87,42 @@ function TripDetail({ trip, onBack, onEdit, onDelete, onUpdatePayment }) {
             </div>
           )}
 
-          <div className="detail-card">
-            <h3>💰 Financial Summary</h3>
-            <div className="financial-summary">
+          {localTrip.destination && (() => {
+            const coords = getCoordinates(localTrip.destination);
+            if (coords) {
+              return (
+                <div className="detail-card">
+                  <h3>📍 Location</h3>
+                  <div style={{
+                    width: '100%',
+                    height: '250px',
+                    borderRadius: '0.5rem',
+                    overflow: 'hidden',
+                    border: '2px solid var(--border-color)'
+                  }}>
+                    <iframe
+                      width="100%"
+                      height="100%"
+                      frameBorder="0"
+                      scrolling="no"
+                      marginHeight="0"
+                      marginWidth="0"
+                      src={`https://www.openstreetmap.org/export/embed.html?bbox=${coords[1]-0.1},${coords[0]-0.1},${coords[1]+0.1},${coords[0]+0.1}&layer=mapnik&marker=${coords[0]},${coords[1]}`}
+                      style={{ border: 0 }}
+                    />
+                  </div>
+                  <p style={{ fontSize: '0.875rem', marginTop: '0.5rem', color: 'var(--text-secondary)' }}>
+                    {localTrip.destination}
+                  </p>
+                </div>
+              );
+            }
+            return null;
+          })()}
+
+          <div className="detail-card" style={{ padding: '1rem' }}>
+            <h3 style={{ fontSize: '1.1rem', marginBottom: '0.75rem' }}>💰 Financial Summary</h3>
+            <div className="financial-summary" style={{ fontSize: '0.9rem' }}>
               <div className="summary-row">
                 <span>Base Trip Cost:</span>
                 <span className="amount">{formatCurrency(parseFloat(localTrip.baseCost || 0))}</span>
@@ -108,7 +142,7 @@ function TripDetail({ trip, onBack, onEdit, onDelete, onUpdatePayment }) {
             </div>
 
             {nextPayment && (
-              <div className="next-payment-alert">
+              <div className="next-payment-alert" style={{ padding: '0.5rem', fontSize: '0.875rem', marginTop: '0.75rem' }}>
                 <strong>Next Payment Due:</strong> {formatCurrency(nextPayment.amount)} on{' '}
                 {formatDate(nextPayment.dueDate)}
               </div>
