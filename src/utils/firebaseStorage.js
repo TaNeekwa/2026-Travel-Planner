@@ -57,14 +57,21 @@ export const addTrip = async (userId, trip) => {
   try {
     if (!userId) throw new Error('User ID is required');
 
+    console.log('Firebase addTrip - userId:', userId);
+    console.log('Firebase addTrip - trip data:', trip);
+
     const tripsCollection = getTripsCollection(userId);
+    console.log('Firebase addTrip - collection path:', `users/${userId}/trips`);
+
     const newTrip = {
       ...trip,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
 
+    console.log('Firebase addTrip - about to call addDoc...');
     const docRef = await addDoc(tripsCollection, newTrip);
+    console.log('Firebase addTrip - docRef created:', docRef.id);
 
     // Return the trip with the new ID
     return {
@@ -75,6 +82,8 @@ export const addTrip = async (userId, trip) => {
     };
   } catch (error) {
     console.error('Error adding trip to Firebase:', error);
+    console.error('Error code:', error.code);
+    console.error('Error message:', error.message);
     throw error;
   }
 };
