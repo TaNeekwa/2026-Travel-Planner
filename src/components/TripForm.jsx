@@ -218,6 +218,70 @@ function TripForm({ trip, onSave, onCancel }) {
     setFormData({ ...formData, packingList: updated });
   };
 
+  // Recurring payment generator
+  const [recurringPayment, setRecurringPayment] = useState({
+    amount: '',
+    frequency: 'monthly',
+    startDate: '',
+    endDate: '',
+  });
+
+  const handleGenerateRecurringPayments = () => {
+    if (!recurringPayment.amount || !recurringPayment.startDate || !recurringPayment.endDate) {
+      alert('Please fill in all fields for recurring payments');
+      return;
+    }
+
+    const amount = parseFloat(recurringPayment.amount);
+    const start = new Date(recurringPayment.startDate);
+    const end = new Date(recurringPayment.endDate);
+
+    if (start >= end) {
+      alert('End date must be after start date');
+      return;
+    }
+
+    const payments = [];
+    let currentDate = new Date(start);
+    let paymentNumber = 1;
+
+    while (currentDate <= end) {
+      payments.push({
+        description: `Payment ${paymentNumber}`,
+        amount: amount,
+        dueDate: currentDate.toISOString().split('T')[0],
+        paid: false,
+      });
+
+      // Increment date based on frequency
+      if (recurringPayment.frequency === 'weekly') {
+        currentDate.setDate(currentDate.getDate() + 7);
+      } else if (recurringPayment.frequency === 'biweekly') {
+        currentDate.setDate(currentDate.getDate() + 14);
+      } else if (recurringPayment.frequency === 'monthly') {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+      }
+
+      paymentNumber++;
+    }
+
+    // Add generated payments to existing ones
+    setFormData({
+      ...formData,
+      monthlyPayments: [...formData.monthlyPayments, ...payments],
+    });
+
+    // Reset recurring payment form
+    setRecurringPayment({
+      amount: '',
+      frequency: 'monthly',
+      startDate: '',
+      endDate: '',
+    });
+
+    alert(`${payments.length} payments generated successfully!`);
+  };
+
   // Document handlers
   const handleDocumentChange = (field, value) => {
     setFormData({
@@ -545,6 +609,69 @@ function TripForm({ trip, onSave, onCancel }) {
           <p className="section-description">
             Track installment payments for group trips or payment plans
           </p>
+
+          <div className="recurring-payment-generator" style={{
+            backgroundColor: 'var(--surface)',
+            border: '2px dashed var(--border-color)',
+            padding: '1.5rem',
+            borderRadius: '0.5rem',
+            marginBottom: '1.5rem'
+          }}>
+            <h4 style={{ marginBottom: '1rem', fontSize: '1rem' }}>Generate Recurring Payments</h4>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Payment Amount</label>
+                <input
+                  type="number"
+                  value={recurringPayment.amount}
+                  onChange={(e) => setRecurringPayment({ ...recurringPayment, amount: e.target.value })}
+                  step="0.01"
+                  placeholder="0.00"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Frequency</label>
+                <select
+                  value={recurringPayment.frequency}
+                  onChange={(e) => setRecurringPayment({ ...recurringPayment, frequency: e.target.value })}
+                >
+                  <option value="weekly">Weekly</option>
+                  <option value="biweekly">Every 2 Weeks</option>
+                  <option value="monthly">Monthly</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>Start Date</label>
+                <input
+                  type="date"
+                  value={recurringPayment.startDate}
+                  onChange={(e) => setRecurringPayment({ ...recurringPayment, startDate: e.target.value })}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>End Date</label>
+                <input
+                  type="date"
+                  value={recurringPayment.endDate}
+                  onChange={(e) => setRecurringPayment({ ...recurringPayment, endDate: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={handleGenerateRecurringPayments}
+              style={{ marginTop: '0.5rem' }}
+            >
+              Generate Payments
+            </button>
+          </div>
 
           {formData.monthlyPayments.map((payment, index) => (
             <div key={index} className="dynamic-item">
