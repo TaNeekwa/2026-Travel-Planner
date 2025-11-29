@@ -19,6 +19,7 @@ function CurrencyConverter() {
     MXN: 17.15,
     BRL: 4.97,
     INR: 83.12,
+    NGN: 1540.00,
   };
 
   const currencies = [
@@ -32,6 +33,7 @@ function CurrencyConverter() {
     { code: 'MXN', name: 'Mexican Peso', symbol: 'MX$' },
     { code: 'BRL', name: 'Brazilian Real', symbol: 'R$' },
     { code: 'INR', name: 'Indian Rupee', symbol: '₹' },
+    { code: 'NGN', name: 'Nigerian Naira', symbol: '₦' },
   ];
 
   const handleConvert = () => {
