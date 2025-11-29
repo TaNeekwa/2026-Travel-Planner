@@ -1,17 +1,17 @@
 :root {
-  --primary-color: #2563eb;
-  --primary-dark: #1e40af;
-  --secondary-color: #64748b;
-  --success-color: #10b981;
-  --warning-color: #f59e0b;
-  --danger-color: #ef4444;
-  --background: #f8fafc;
+  --primary-color: #EC4899;
+  --primary-dark: #DB2777;
+  --secondary-color: #D946EF;
+  --success-color: #F472B6;
+  --warning-color: #FB923C;
+  --danger-color: #F43F5E;
+  --background: #FFF1F2;
   --surface: #ffffff;
-  --text-primary: #1e293b;
-  --text-secondary: #64748b;
-  --border-color: #e2e8f0;
-  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --text-primary: #831843;
+  --text-secondary: #BE185D;
+  --border-color: #FBCFE8;
+  --shadow: 0 1px 3px 0 rgba(236, 72, 153, 0.15), 0 1px 2px 0 rgba(236, 72, 153, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(236, 72, 153, 0.2), 0 4px 6px -2px rgba(236, 72, 153, 0.15);
 
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
@@ -28,19 +28,19 @@
 
 /* Dark Mode */
 body.dark-mode {
-  --primary-color: #60a5fa;
-  --primary-dark: #3b82f6;
-  --secondary-color: #94a3b8;
-  --success-color: #34d399;
-  --warning-color: #fbbf24;
-  --danger-color: #f87171;
-  --background: #0f172a;
-  --surface: #1e293b;
-  --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
-  --border-color: #334155;
-  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+  --primary-color: #F472B6;
+  --primary-dark: #EC4899;
+  --secondary-color: #E879F9;
+  --success-color: #FB7185;
+  --warning-color: #FB923C;
+  --danger-color: #FDA4AF;
+  --background: #1F0A13;
+  --surface: #3B0818;
+  --text-primary: #FCE7F3;
+  --text-secondary: #F9A8D4;
+  --border-color: #831843;
+  --shadow: 0 1px 3px 0 rgba(244, 114, 182, 0.3), 0 1px 2px 0 rgba(244, 114, 182, 0.2);
+  --shadow-lg: 0 10px 15px -3px rgba(244, 114, 182, 0.3), 0 4px 6px -2px rgba(244, 114, 182, 0.2);
 }
 
 body.dark-mode {
@@ -118,7 +118,7 @@ textarea:focus,
 select:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.2);
 }
 
 .btn {
@@ -150,7 +150,7 @@ select:focus {
 }
 
 .btn-secondary:hover {
-  background-color: #475569;
+  background-color: #C026D3;
   transform: translateY(-1px);
 }
 
@@ -160,7 +160,7 @@ select:focus {
 }
 
 .btn-danger:hover {
-  background-color: #dc2626;
+  background-color: #E11D48;
 }
 
 .btn-sm {
