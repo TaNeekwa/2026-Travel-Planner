@@ -1,17 +1,20 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import BudgetOverview from './BudgetOverview';
 import TravelStats from './TravelStats';
 import TravelMap from './TravelMap';
 import TripCard from './TripCard';
 import CalendarView from './CalendarView';
 import { getTripsByStatus } from '../utils/calculations';
+import { useAuth } from '../contexts/AuthContext';
 
 function Dashboard({ trips, onViewTrip, onEditTrip, onDeleteTrip }) {
+  const { currentUser } = useAuth();
   const [filter, setFilter] = useState('all');
   const [sortBy, setSortBy] = useState('date');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'calendar'
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState('all');
+  const fileInputRef = useRef(null);
 
   const tripsByStatus = getTripsByStatus(trips);
 
@@ -74,6 +77,60 @@ function Dashboard({ trips, onViewTrip, onEditTrip, onDeleteTrip }) {
   const filteredTrips = getFilteredTrips();
   const sortedTrips = getSortedTrips(filteredTrips);
 
+  // Export trips to JSON file
+  const handleExportTrips = () => {
+    if (trips.length === 0) {
+      alert('No trips to export!');
+      return;
+    }
+
+    const dataStr = JSON.stringify(trips, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `travel-planner-trips-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    alert(`Exported ${trips.length} trips successfully! Transfer this file to your phone to import.`);
+  };
+
+  // Import trips from JSON file
+  const handleImportTrips = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const importedTrips = JSON.parse(e.target.result);
+
+        if (!Array.isArray(importedTrips)) {
+          alert('Invalid file format. Please select a valid trips export file.');
+          return;
+        }
+
+        // Save to localStorage
+        const storageKey = `trips_${currentUser.uid}`;
+        localStorage.setItem(storageKey, JSON.stringify(importedTrips));
+
+        // Reload the page to show imported trips
+        alert(`Successfully imported ${importedTrips.length} trips! Refreshing...`);
+        window.location.reload();
+      } catch (error) {
+        console.error('Error importing trips:', error);
+        alert('Failed to import trips. Please make sure the file is valid.');
+      }
+    };
+    reader.readAsText(file);
+
+    // Reset file input
+    event.target.value = '';
+  };
+
   return (
     <div className="dashboard">
       <TravelStats trips={trips} />
@@ -114,6 +171,30 @@ function Dashboard({ trips, onViewTrip, onEditTrip, onDeleteTrip }) {
           >
             📅 Calendar View
           </button>
+        </div>
+
+        <div className="export-import-controls" style={{ display: 'flex', gap: '0.5rem' }}>
+          <button
+            className="btn btn-sm btn-secondary"
+            onClick={handleExportTrips}
+            title="Download trips to transfer to another device"
+          >
+            📥 Export Trips
+          </button>
+          <button
+            className="btn btn-sm btn-secondary"
+            onClick={() => fileInputRef.current?.click()}
+            title="Load trips from another device"
+          >
+            📤 Import Trips
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json"
+            onChange={handleImportTrips}
+            style={{ display: 'none' }}
+          />
         </div>
 
         {viewMode === 'grid' && (
