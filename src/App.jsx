@@ -3,6 +3,7 @@ import Dashboard from './components/Dashboard';
 import TripDetail from './components/TripDetail';
 import TripForm from './components/TripForm';
 import CurrencyConverter from './components/CurrencyConverter';
+import ProfileSettings from './components/ProfileSettings';
 import Login from './components/Login';
 import Signup from './components/Signup';
 import { useAuth } from './contexts/AuthContext';
@@ -178,7 +179,7 @@ function App() {
               </button>
             </>
           )}
-          {currentView === 'converter' && (
+          {(currentView === 'converter' || currentView === 'settings') && (
             <button
               className="btn btn-secondary"
               onClick={handleBackToDashboard}
@@ -186,6 +187,13 @@ function App() {
               ← Back to Dashboard
             </button>
           )}
+          <button
+            className="btn btn-icon"
+            onClick={() => setCurrentView('settings')}
+            title="Account Settings"
+          >
+            ⚙️
+          </button>
           <button
             className="btn btn-danger"
             onClick={handleLogout}
@@ -232,6 +240,10 @@ function App() {
 
         {currentView === 'converter' && (
           <CurrencyConverter />
+        )}
+
+        {currentView === 'settings' && (
+          <ProfileSettings onBack={handleBackToDashboard} />
         )}
       </main>
     </div>
