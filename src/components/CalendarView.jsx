@@ -29,6 +29,41 @@ function CalendarView({ trips, onViewTrip }) {
     });
   };
 
+  const getPaymentsForDate = (date) => {
+    const payments = [];
+    const dateStr = date.toISOString().split('T')[0];
+
+    trips.forEach(trip => {
+      // Check deposit due date
+      if (trip.depositDueDate === dateStr && trip.deposit && !trip.depositPaid) {
+        payments.push({
+          tripName: trip.name,
+          description: 'Deposit',
+          amount: parseFloat(trip.deposit),
+          currency: trip.currency || 'USD',
+          type: 'deposit'
+        });
+      }
+
+      // Check monthly payments
+      if (trip.monthlyPayments && trip.monthlyPayments.length > 0) {
+        trip.monthlyPayments.forEach(payment => {
+          if (payment.dueDate === dateStr && !payment.paid) {
+            payments.push({
+              tripName: trip.name,
+              description: payment.description || 'Payment',
+              amount: parseFloat(payment.amount),
+              currency: trip.currency || 'USD',
+              type: 'monthly'
+            });
+          }
+        });
+      }
+    });
+
+    return payments;
+  };
+
   const previousMonth = () => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
   };
@@ -57,16 +92,19 @@ function CalendarView({ trips, onViewTrip }) {
     for (let day = 1; day <= daysInMonth; day++) {
       const currentDateObj = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
       const tripsOnDay = getTripsForDate(currentDateObj);
+      const paymentsOnDay = getPaymentsForDate(currentDateObj);
       const isToday = currentDateObj.getTime() === today.getTime();
+      const hasItems = tripsOnDay.length > 0 || paymentsOnDay.length > 0;
 
       days.push(
         <div
           key={day}
-          className={`calendar-day ${tripsOnDay.length > 0 ? 'has-trips' : ''} ${
+          className={`calendar-day ${hasItems ? 'has-trips' : ''} ${
             isToday ? 'is-today' : ''
-          }`}
+          } ${paymentsOnDay.length > 0 ? 'has-payments' : ''}`}
         >
           <div className="calendar-day-number">{day}</div>
+
           {tripsOnDay.length > 0 && (
             <div className="calendar-day-trips">
               {tripsOnDay.map(trip => (
@@ -76,8 +114,26 @@ function CalendarView({ trips, onViewTrip }) {
                   onClick={() => onViewTrip(trip)}
                   title={trip.name}
                 >
-                  <div className="calendar-trip-name">{trip.name}</div>
-                  <div className="calendar-trip-dest">{trip.destination}</div>
+                  <div className="calendar-trip-name">✈️ {trip.name}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {paymentsOnDay.length > 0 && (
+            <div className="calendar-day-payments">
+              {paymentsOnDay.map((payment, idx) => (
+                <div
+                  key={idx}
+                  className="calendar-payment"
+                  title={`${payment.tripName}: ${payment.description} - ${formatCurrency(payment.amount)}`}
+                >
+                  <div className="calendar-payment-indicator">
+                    💳 {formatCurrency(payment.amount)}
+                  </div>
+                  <div className="calendar-payment-trip" style={{ fontSize: '0.7rem' }}>
+                    {payment.tripName}
+                  </div>
                 </div>
               ))}
             </div>
@@ -122,8 +178,12 @@ function CalendarView({ trips, onViewTrip }) {
 
       <div className="calendar-legend">
         <div className="legend-item">
-          <div className="legend-box has-trip"></div>
-          <span>Day with trip</span>
+          <span>✈️</span>
+          <span>Trip days</span>
+        </div>
+        <div className="legend-item">
+          <span>💳</span>
+          <span>Payment due</span>
         </div>
         <div className="legend-item">
           <div className="legend-box is-today-box"></div>
