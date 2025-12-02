@@ -30,9 +30,9 @@ function WelcomeTour({ onComplete }) {
       icon: '📅',
     },
     {
-      title: 'Interactive Map & Weather',
-      content: 'The dashboard shows your trips on a world map! Click any marker to view trip details. Each trip also shows weather forecasts for your destination!',
-      icon: '🌍',
+      title: 'Discover on TikTok & Map',
+      content: 'The dashboard shows your trips on a world map! Click any destination marker to instantly explore TikTok travel content - see real videos, tips, and hidden gems! Each trip also shows weather forecasts.',
+      icon: '🎬',
     },
     {
       title: 'Export & Import',
