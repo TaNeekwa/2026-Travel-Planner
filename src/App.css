@@ -2691,3 +2691,29 @@
 .react-datepicker__year-dropdown::-webkit-scrollbar-thumb:hover {
   background: var(--primary-dark);
 }
+
+/* Carousel slide fade effect */
+.trips-carousel > * {
+  animation: fadeInSlide 0.5s ease-out;
+  animation-fill-mode: both;
+}
+
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Smooth transitions when scrolling */
+.trips-carousel {
+  scroll-behavior: smooth;
+}
+
+.trips-carousel > * {
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
