@@ -24,6 +24,33 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [showWelcomeTour, setShowWelcomeTour] = useState(false);
 
+  // Handle browser back button
+  useEffect(() => {
+    const handlePopState = (event) => {
+      if (event.state && event.state.view) {
+        setCurrentView(event.state.view);
+        if (event.state.tripId) {
+          const trip = trips.find(t => t.id === event.state.tripId);
+          setSelectedTrip(trip);
+        } else {
+          setSelectedTrip(null);
+        }
+      } else {
+        setCurrentView('dashboard');
+        setSelectedTrip(null);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    // Set initial state
+    if (!window.history.state) {
+      window.history.replaceState({ view: 'dashboard' }, '');
+    }
+
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [trips]);
+
   // Load trips when user is authenticated
   useEffect(() => {
     const fetchTrips = async () => {
@@ -72,6 +99,7 @@ function App() {
       console.log('Trip added successfully:', newTrip);
       setTrips([...trips, newTrip]);
       setCurrentView('dashboard');
+      window.history.pushState({ view: 'dashboard' }, '');
     } catch (error) {
       console.error('Error adding trip:', error);
       console.error('Error details:', error.message, error.code);
@@ -85,6 +113,7 @@ function App() {
       if (updated) {
         setTrips(trips.map(t => t.id === id ? { ...t, ...updated } : t));
         setCurrentView('dashboard');
+        window.history.pushState({ view: 'dashboard' }, '');
       }
     } catch (error) {
       console.error('Error updating trip:', error);
@@ -97,6 +126,7 @@ function App() {
       await deleteTrip(currentUser.uid, id);
       setTrips(trips.filter(t => t.id !== id));
       setCurrentView('dashboard');
+      window.history.pushState({ view: 'dashboard' }, '');
     } catch (error) {
       console.error('Error deleting trip:', error);
       alert('Failed to delete trip. Please try again.');
@@ -117,16 +147,19 @@ function App() {
   const handleViewTrip = (trip) => {
     setSelectedTrip(trip);
     setCurrentView('detail');
+    window.history.pushState({ view: 'detail', tripId: trip.id }, '');
   };
 
   const handleEditTrip = (trip) => {
     setSelectedTrip(trip);
     setCurrentView('edit');
+    window.history.pushState({ view: 'edit', tripId: trip.id }, '');
   };
 
   const handleBackToDashboard = () => {
     setSelectedTrip(null);
     setCurrentView('dashboard');
+    window.history.pushState({ view: 'dashboard' }, '');
   };
 
   const handleCompleteTour = () => {
@@ -182,13 +215,19 @@ function App() {
             <>
               <button
                 className="btn btn-secondary"
-                onClick={() => setCurrentView('converter')}
+                onClick={() => {
+                  setCurrentView('converter');
+                  window.history.pushState({ view: 'converter' }, '');
+                }}
               >
                 💱 Currency Converter
               </button>
               <button
                 className="btn btn-primary"
-                onClick={() => setCurrentView('add')}
+                onClick={() => {
+                  setCurrentView('add');
+                  window.history.pushState({ view: 'add' }, '');
+                }}
               >
                 + Add New Trip
               </button>
@@ -204,7 +243,10 @@ function App() {
           )}
           <button
             className="btn btn-icon"
-            onClick={() => setCurrentView('settings')}
+            onClick={() => {
+              setCurrentView('settings');
+              window.history.pushState({ view: 'settings' }, '');
+            }}
             title="Account Settings"
           >
             ⚙️
