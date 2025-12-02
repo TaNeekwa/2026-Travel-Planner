@@ -2717,3 +2717,35 @@
 .trips-carousel > * {
   transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
 }
+
+/* Trip Currency Badge */
+.trip-currency-badge {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  padding: 0.75rem 1.25rem;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  color: white;
+  border-radius: 2rem;
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.detail-hero {
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .trip-currency-badge {
+    bottom: 0.5rem;
+    right: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+}

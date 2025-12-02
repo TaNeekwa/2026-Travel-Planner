@@ -104,6 +104,12 @@ function TripDetail({ trip, onBack, onEdit, onDelete, onUpdatePayment }) {
                 🎬 Explore {localTrip.destination} on TikTok
               </a>
             )}
+
+            {localTrip.currency && (
+              <div className="trip-currency-badge">
+                💱 {localTrip.currency}
+              </div>
+            )}
           </div>
 
           {localTrip.description && (
