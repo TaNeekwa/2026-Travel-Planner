@@ -1169,7 +1169,7 @@
 .weather-widget {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 0.75rem;
-  padding: 1.5rem;
+  padding: 1.5rem 0.75rem;
   color: white;
 }
 
