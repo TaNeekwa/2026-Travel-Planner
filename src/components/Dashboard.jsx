@@ -15,6 +15,7 @@ function Dashboard({ trips, onViewTrip, onEditTrip, onDeleteTrip }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState('all');
   const fileInputRef = useRef(null);
+  const carouselRef = useRef(null);
 
   const tripsByStatus = getTripsByStatus(trips);
 
@@ -76,6 +77,21 @@ function Dashboard({ trips, onViewTrip, onEditTrip, onDeleteTrip }) {
 
   const filteredTrips = getFilteredTrips();
   const sortedTrips = getSortedTrips(filteredTrips);
+
+  // Carousel navigation functions
+  const scrollLeft = () => {
+    if (carouselRef.current) {
+      const scrollAmount = carouselRef.current.offsetWidth * 0.8; // Scroll by 80% of container width
+      carouselRef.current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  const scrollRight = () => {
+    if (carouselRef.current) {
+      const scrollAmount = carouselRef.current.offsetWidth * 0.8;
+      carouselRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   // Export trips to JSON file
   const handleExportTrips = () => {
@@ -236,7 +252,7 @@ function Dashboard({ trips, onViewTrip, onEditTrip, onDeleteTrip }) {
       {viewMode === 'calendar' ? (
         <CalendarView trips={trips} onViewTrip={onViewTrip} />
       ) : (
-        <div className="trips-grid">
+        <>
           {sortedTrips.length === 0 ? (
             <div className="empty-state">
               <h2>No trips found</h2>
@@ -247,21 +263,45 @@ function Dashboard({ trips, onViewTrip, onEditTrip, onDeleteTrip }) {
               </p>
             </div>
           ) : (
-            sortedTrips.map(trip => (
-              <TripCard
-                key={trip.id}
-                trip={trip}
-                onView={() => onViewTrip(trip)}
-                onEdit={() => onEditTrip(trip)}
-                onDelete={() => {
-                  if (window.confirm(`Are you sure you want to delete "${trip.name}"?`)) {
-                    onDeleteTrip(trip.id);
-                  }
-                }}
-              />
-            ))
+            <div className="trips-carousel-container">
+              {sortedTrips.length > 3 && (
+                <button
+                  className="carousel-nav carousel-nav-left"
+                  onClick={scrollLeft}
+                  aria-label="Scroll left"
+                >
+                  ←
+                </button>
+              )}
+
+              <div className="trips-carousel" ref={carouselRef}>
+                {sortedTrips.map(trip => (
+                  <TripCard
+                    key={trip.id}
+                    trip={trip}
+                    onView={() => onViewTrip(trip)}
+                    onEdit={() => onEditTrip(trip)}
+                    onDelete={() => {
+                      if (window.confirm(`Are you sure you want to delete "${trip.name}"?`)) {
+                        onDeleteTrip(trip.id);
+                      }
+                    }}
+                  />
+                ))}
+              </div>
+
+              {sortedTrips.length > 3 && (
+                <button
+                  className="carousel-nav carousel-nav-right"
+                  onClick={scrollRight}
+                  aria-label="Scroll right"
+                >
+                  →
+                </button>
+              )}
+            </div>
           )}
-        </div>
+        </>
       )}
     </div>
   );
