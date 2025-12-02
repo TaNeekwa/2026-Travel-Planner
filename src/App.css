@@ -2462,6 +2462,10 @@
 }
 
 /* Date Picker Popup Calendar Styling */
+.react-datepicker-popper {
+  z-index: 10001 !important;
+}
+
 .react-datepicker {
   font-family: inherit;
   border: 1px solid var(--border-color);

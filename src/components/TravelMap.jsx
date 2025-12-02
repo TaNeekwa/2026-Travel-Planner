@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Tooltip, Polyline, useMap } from 'react-leaflet';
 import { useEffect, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -6,6 +6,8 @@ import { getTripLocations } from '../utils/geocoding';
 import { formatDate } from '../utils/calculations';
 import LocationAutocomplete from './LocationAutocomplete';
 import { getCurrencyFromDestination } from '../utils/currencyMapping';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 // Fix for default marker icons in React Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -84,6 +86,24 @@ function TravelMap({ trips, onMarkerClick, onAddPastTrip }) {
   // Default center (center of US) if no trips
   const defaultCenter = [39.8283, -98.5795];
   const defaultZoom = 4;
+
+  // Get completed trips in chronological order and create line coordinates
+  const getCompletedTripLines = () => {
+    // Filter only completed trips
+    const completedTrips = locations.filter(loc => loc.status === 'completed');
+
+    // Sort by start date (oldest to newest)
+    completedTrips.sort((a, b) => {
+      const dateA = new Date(a.startDate);
+      const dateB = new Date(b.startDate);
+      return dateA - dateB;
+    });
+
+    // Create array of coordinates for the polyline
+    return completedTrips.map(trip => trip.coordinates);
+  };
+
+  const completedTripPath = getCompletedTripLines();
 
   const handleInputChange = (e) => {
     setPastTripData({
@@ -177,6 +197,19 @@ function TravelMap({ trips, onMarkerClick, onAddPastTrip }) {
             </Marker>
           ))}
 
+          {/* Pink lines connecting completed trips in chronological order */}
+          {completedTripPath.length >= 2 && (
+            <Polyline
+              positions={completedTripPath}
+              pathOptions={{
+                color: '#ff1493',
+                weight: 3,
+                opacity: 0.7,
+                dashArray: '10, 10',
+              }}
+            />
+          )}
+
           <FitBounds locations={locations} />
         </MapContainer>
       )}
@@ -215,24 +248,40 @@ function TravelMap({ trips, onMarkerClick, onAddPastTrip }) {
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="startDate">Start Date *</label>
-                  <input
-                    type="date"
-                    id="startDate"
-                    name="startDate"
-                    value={pastTripData.startDate}
-                    onChange={handleInputChange}
+                  <DatePicker
+                    selected={pastTripData.startDate ? new Date(pastTripData.startDate) : null}
+                    onChange={(date) => {
+                      const dateStr = date ? date.toISOString().split('T')[0] : '';
+                      setPastTripData({ ...pastTripData, startDate: dateStr });
+                    }}
+                    dateFormat="MMMM d, yyyy"
+                    placeholderText="Select start date"
+                    showMonthDropdown
+                    showYearDropdown
+                    dropdownMode="select"
+                    yearDropdownItemNumber={15}
+                    scrollableYearDropdown
                     required
                   />
                 </div>
 
                 <div className="form-group">
                   <label htmlFor="endDate">End Date *</label>
-                  <input
-                    type="date"
-                    id="endDate"
-                    name="endDate"
-                    value={pastTripData.endDate}
-                    onChange={handleInputChange}
+                  <DatePicker
+                    selected={pastTripData.endDate ? new Date(pastTripData.endDate) : null}
+                    onChange={(date) => {
+                      const dateStr = date ? date.toISOString().split('T')[0] : '';
+                      setPastTripData({ ...pastTripData, endDate: dateStr });
+                    }}
+                    dateFormat="MMMM d, yyyy"
+                    placeholderText="Select end date"
+                    showMonthDropdown
+                    showYearDropdown
+                    dropdownMode="select"
+                    yearDropdownItemNumber={15}
+                    scrollableYearDropdown
+                    minDate={pastTripData.startDate ? new Date(pastTripData.startDate) : null}
+                    openToDate={pastTripData.startDate ? new Date(pastTripData.startDate) : new Date()}
                     required
                   />
                 </div>
