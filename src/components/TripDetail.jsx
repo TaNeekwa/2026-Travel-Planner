@@ -78,6 +78,32 @@ function TripDetail({ trip, onBack, onEdit, onDelete, onUpdatePayment }) {
             <div className={`booking-status-badge ${localTrip.isBooked ? 'booked' : 'planning'}`}>
               {localTrip.isBooked ? '✓ Trip Booked' : '📝 Still Planning'}
             </div>
+            {localTrip.destination && (
+              <a
+                href={`https://www.tiktok.com/search?q=${encodeURIComponent(localTrip.destination + ' travel')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-tiktok"
+                style={{
+                  display: 'inline-block',
+                  marginTop: '1rem',
+                  padding: '0.75rem 1.5rem',
+                  backgroundColor: '#000',
+                  color: '#fff',
+                  textDecoration: 'none',
+                  borderRadius: '0.5rem',
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  border: 'none',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s',
+                }}
+                onMouseOver={(e) => e.target.style.backgroundColor = '#ff0050'}
+                onMouseOut={(e) => e.target.style.backgroundColor = '#000'}
+              >
+                🎬 Explore {localTrip.destination} on TikTok
+              </a>
+            )}
           </div>
 
           {localTrip.description && (

@@ -139,6 +139,28 @@ function TravelMap({ trips, onMarkerClick }) {
                   <div className={`popup-status status-${location.status}`}>
                     {location.status.charAt(0).toUpperCase() + location.status.slice(1)}
                   </div>
+                  <a
+                    href={`https://www.tiktok.com/search?q=${encodeURIComponent(location.destination + ' travel')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="popup-tiktok-btn"
+                    style={{
+                      display: 'inline-block',
+                      marginTop: '0.5rem',
+                      padding: '0.4rem 0.8rem',
+                      backgroundColor: '#000',
+                      color: '#fff',
+                      textDecoration: 'none',
+                      borderRadius: '0.375rem',
+                      fontSize: '0.875rem',
+                      fontWeight: '600',
+                      transition: 'background-color 0.2s',
+                    }}
+                    onMouseOver={(e) => e.target.style.backgroundColor = '#ff0050'}
+                    onMouseOut={(e) => e.target.style.backgroundColor = '#000'}
+                  >
+                    🎬 See on TikTok
+                  </a>
                 </div>
               </Popup>
             </Marker>
