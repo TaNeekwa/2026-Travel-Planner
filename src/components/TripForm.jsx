@@ -359,29 +359,31 @@ function TripForm({ trip, onSave, onCancel }) {
         <div className="form-section">
           <h3>Basic Information</h3>
 
-          <div className="form-group">
-            <label htmlFor="name">
-              Trip Name <span className="required">*</span>
-            </label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              placeholder="e.g., Tokyo Adventure 2026"
-            />
-          </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="name">
+                Trip Name <span className="required">*</span>
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+                placeholder="e.g., Tokyo Adventure 2026"
+              />
+            </div>
 
-          <div className="form-group">
-            <label htmlFor="destination">Destination</label>
-            <LocationAutocomplete
-              value={formData.destination}
-              onChange={(value) => handleChange({ target: { name: 'destination', value } })}
-              placeholder="Start typing a city... (e.g., New York, Tokyo, Paris)"
-              required={false}
-            />
+            <div className="form-group">
+              <label htmlFor="destination">Destination</label>
+              <LocationAutocomplete
+                value={formData.destination}
+                onChange={(value) => handleChange({ target: { name: 'destination', value } })}
+                placeholder="Start typing a city... (e.g., New York, Tokyo, Paris)"
+                required={false}
+              />
+            </div>
           </div>
 
           <div className="form-row">
@@ -414,55 +416,57 @@ function TripForm({ trip, onSave, onCancel }) {
             </div>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="description">Description</label>
-            <textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              rows="3"
-              placeholder="Brief description of the trip..."
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Trip Tags/Categories</label>
-            <div className="tags-selector">
-              {['Leisure', 'Business', 'Family', 'Solo', 'Adventure', 'Beach', 'City', 'Cultural', 'Food', 'Nature', 'Romantic', 'Budget'].map(tag => (
-                <button
-                  key={tag}
-                  type="button"
-                  className={`tag-btn ${formData.tags.includes(tag) ? 'active' : ''}`}
-                  onClick={() => {
-                    if (formData.tags.includes(tag)) {
-                      handleRemoveTag(tag);
-                    } else {
-                      handleAddTag(tag);
-                    }
-                  }}
-                >
-                  {tag}
-                </button>
-              ))}
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="description">Description</label>
+              <textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                rows="3"
+                placeholder="Brief description of the trip..."
+              />
             </div>
-            {formData.tags.length > 0 && (
-              <div className="selected-tags">
-                <small>Selected: </small>
-                {formData.tags.map(tag => (
-                  <span key={tag} className="tag-chip">
+
+            <div className="form-group">
+              <label>Trip Tags/Categories</label>
+              <div className="tags-selector">
+                {['Leisure', 'Business', 'Family', 'Solo', 'Adventure', 'Beach', 'City', 'Cultural', 'Food', 'Nature', 'Romantic', 'Budget'].map(tag => (
+                  <button
+                    key={tag}
+                    type="button"
+                    className={`tag-btn ${formData.tags.includes(tag) ? 'active' : ''}`}
+                    onClick={() => {
+                      if (formData.tags.includes(tag)) {
+                        handleRemoveTag(tag);
+                      } else {
+                        handleAddTag(tag);
+                      }
+                    }}
+                  >
                     {tag}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveTag(tag)}
-                      className="tag-remove"
-                    >
-                      ×
-                    </button>
-                  </span>
+                  </button>
                 ))}
               </div>
-            )}
+              {formData.tags.length > 0 && (
+                <div className="selected-tags">
+                  <small>Selected: </small>
+                  {formData.tags.map(tag => (
+                    <span key={tag} className="tag-chip">
+                      {tag}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveTag(tag)}
+                        className="tag-remove"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="form-group checkbox-group">
