@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import LocationAutocomplete from './LocationAutocomplete';
 
 function TripForm({ trip, onSave, onCancel }) {
@@ -391,13 +393,17 @@ function TripForm({ trip, onSave, onCancel }) {
               <label htmlFor="startDate">
                 Start Date <span className="required">*</span>
               </label>
-              <input
-                type="date"
-                id="startDate"
-                name="startDate"
-                value={formData.startDate}
-                onChange={handleChange}
+              <DatePicker
+                selected={formData.startDate ? new Date(formData.startDate) : null}
+                onChange={(date) => {
+                  const dateStr = date ? date.toISOString().split('T')[0] : '';
+                  handleChange({ target: { name: 'startDate', value: dateStr } });
+                }}
+                dateFormat="MMMM d, yyyy"
+                placeholderText="Select start date"
+                className="date-picker-input"
                 required
+                minDate={new Date()}
               />
             </div>
 
@@ -405,13 +411,18 @@ function TripForm({ trip, onSave, onCancel }) {
               <label htmlFor="endDate">
                 End Date <span className="required">*</span>
               </label>
-              <input
-                type="date"
-                id="endDate"
-                name="endDate"
-                value={formData.endDate}
-                onChange={handleChange}
+              <DatePicker
+                selected={formData.endDate ? new Date(formData.endDate) : null}
+                onChange={(date) => {
+                  const dateStr = date ? date.toISOString().split('T')[0] : '';
+                  handleChange({ target: { name: 'endDate', value: dateStr } });
+                }}
+                dateFormat="MMMM d, yyyy"
+                placeholderText="Select end date"
+                className="date-picker-input"
                 required
+                minDate={formData.startDate ? new Date(formData.startDate) : new Date()}
+                openToDate={formData.startDate ? new Date(formData.startDate) : new Date()}
               />
             </div>
           </div>
