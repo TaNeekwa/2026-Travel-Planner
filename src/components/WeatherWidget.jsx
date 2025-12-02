@@ -5,6 +5,7 @@ function WeatherWidget({ destination, startDate }) {
   const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentDayIndex, setCurrentDayIndex] = useState(0);
 
   useEffect(() => {
     const fetchWeather = async () => {
@@ -98,6 +99,25 @@ function WeatherWidget({ destination, startDate }) {
     return null;
   }
 
+  const totalDays = 7;
+  const daysToShow = 2;
+  const canGoBack = currentDayIndex > 0;
+  const canGoForward = currentDayIndex + daysToShow < totalDays;
+
+  const handlePrevious = () => {
+    if (canGoBack) {
+      setCurrentDayIndex(currentDayIndex - daysToShow);
+    }
+  };
+
+  const handleNext = () => {
+    if (canGoForward) {
+      setCurrentDayIndex(currentDayIndex + daysToShow);
+    }
+  };
+
+  const visibleDays = weather.daily.time.slice(currentDayIndex, currentDayIndex + daysToShow);
+
   return (
     <div className="weather-widget">
       <div className="weather-header">
@@ -105,36 +125,61 @@ function WeatherWidget({ destination, startDate }) {
         <span className="weather-location">📍 {destination}</span>
       </div>
 
-      <div className="weather-forecast">
-        {weather.daily.time.slice(0, 7).map((date, index) => (
-          <div key={date} className="weather-day">
-            <div className="weather-date">{formatDate(date)}</div>
-            <div className="weather-icon">
-              {getWeatherIcon(weather.daily.weathercode[index])}
-            </div>
-            <div className="weather-desc">
-              {getWeatherDescription(weather.daily.weathercode[index])}
-            </div>
-            <div className="weather-temp">
-              <span className="temp-high">
-                {Math.round(weather.daily.temperature_2m_max[index])}°
-              </span>
-              <span className="temp-divider">/</span>
-              <span className="temp-low">
-                {Math.round(weather.daily.temperature_2m_min[index])}°
-              </span>
-            </div>
-            {weather.daily.precipitation_probability_max[index] > 0 && (
-              <div className="weather-precip">
-                💧 {weather.daily.precipitation_probability_max[index]}%
+      <div className="weather-carousel-container">
+        <button
+          className="weather-nav weather-nav-left"
+          onClick={handlePrevious}
+          disabled={!canGoBack}
+          aria-label="Previous days"
+        >
+          ‹
+        </button>
+
+        <div className="weather-forecast">
+          {visibleDays.map((date, offset) => {
+            const index = currentDayIndex + offset;
+            return (
+              <div key={date} className="weather-day">
+                <div className="weather-date">{formatDate(date)}</div>
+                <div className="weather-icon">
+                  {getWeatherIcon(weather.daily.weathercode[index])}
+                </div>
+                <div className="weather-desc">
+                  {getWeatherDescription(weather.daily.weathercode[index])}
+                </div>
+                <div className="weather-temp">
+                  <span className="temp-high">
+                    {Math.round(weather.daily.temperature_2m_max[index])}°
+                  </span>
+                  <span className="temp-divider">/</span>
+                  <span className="temp-low">
+                    {Math.round(weather.daily.temperature_2m_min[index])}°
+                  </span>
+                </div>
+                {weather.daily.precipitation_probability_max[index] > 0 && (
+                  <div className="weather-precip">
+                    💧 {weather.daily.precipitation_probability_max[index]}%
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        ))}
+            );
+          })}
+        </div>
+
+        <button
+          className="weather-nav weather-nav-right"
+          onClick={handleNext}
+          disabled={!canGoForward}
+          aria-label="Next days"
+        >
+          ›
+        </button>
       </div>
 
       <div className="weather-footer">
-        <small>Powered by Open-Meteo · Updated in real-time</small>
+        <small>
+          Days {currentDayIndex + 1}-{Math.min(currentDayIndex + daysToShow, totalDays)} of {totalDays} · Powered by Open-Meteo
+        </small>
       </div>
     </div>
   );
