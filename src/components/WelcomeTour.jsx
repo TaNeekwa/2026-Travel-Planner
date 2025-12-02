@@ -5,39 +5,49 @@ function WelcomeTour({ onComplete }) {
 
   const steps = [
     {
-      title: ' Welcome to Your 2026 Travel Planner!',
+      title: 'Welcome to Your 2026 Travel Planner!',
       content: "We're excited to help you plan your adventures! Let's take a quick tour to show you around.",
-      icon: '<â',
+      icon: 'üéâ',
     },
     {
-      title: 'ï Create Your First Trip',
-      content: 'Click the "+ Add New Trip" button to start planning. Fill in details like destination, dates, costs, and more!',
-      icon: '',
+      title: 'Create Your First Trip',
+      content: 'Look at the top right corner - click the green "+ Add New Trip" button. Fill in trip name, destination, dates, and costs. You can add as much or as little detail as you want!',
+      icon: '‚úèÔ∏è',
     },
     {
-      title: '=∞ Track Payments',
-      content: 'Add deposits and monthly payment plans. Use the recurring payment generator to automatically create payment schedules!',
-      icon: '=≥',
+      title: 'Currency Converter',
+      content: 'Click the "Currency Converter" button in the header to convert between 11 currencies including USD, EUR, GBP, and NGN. Perfect for budgeting international trips!',
+      icon: 'üí±',
     },
     {
-      title: '=≈ Calendar View',
-      content: 'Switch to Calendar View to see all your trips and payment due dates in one place. Perfect for planning!',
-      icon: '=≈',
+      title: 'Payment Plans',
+      content: 'When creating a trip, scroll to "Monthly Payment Plan" section. Use the "Generate Recurring Payments" feature to automatically create weekly, bi-weekly, or monthly payment schedules!',
+      icon: 'üí≥',
     },
     {
-      title: '=˙ Explore Features',
-      content: 'Check out the interactive world map, weather forecasts, currency converter, and more. Everything you need for travel planning!',
-      icon: '<',
+      title: 'Calendar View',
+      content: 'On the dashboard, click "Calendar View" to see all your trips AND payment due dates on a calendar. Navigate months to see your complete schedule!',
+      icon: 'üìÖ',
     },
     {
-      title: '=Ò Use Anywhere',
-      content: 'Access your trips on any device! Use Export/Import to transfer trips between your computer and phone.',
-      icon: '=Ú',
+      title: 'Interactive Map & Weather',
+      content: 'The dashboard shows your trips on a world map! Click any marker to view trip details. Each trip also shows weather forecasts for your destination!',
+      icon: 'üåç',
     },
     {
-      title: "<ä You're All Set!",
-      content: "Ready to start planning your 2026 adventures? Click 'Get Started' to begin!",
-      icon: '=Ä',
+      title: 'Export & Import',
+      content: 'Using multiple devices? Click "Export Trips" on your computer to download your data, then "Import Trips" on your phone to load them there!',
+      icon: 'üì≤',
+    },
+    {
+      title: 'Account Settings',
+      content: 'Click the gear icon in the header to update your name, email, or password. Keep your account secure and personalized!',
+      icon: '‚öôÔ∏è',
+    },
+    {
+      title: "You're All Set!",
+      content: 'Ready to start planning your 2026 adventures? Click "Get Started" to begin creating your first trip!',
+      icon: 'üöÄ',
     },
   ];
 
@@ -94,7 +104,7 @@ function WelcomeTour({ onComplete }) {
         <div className="welcome-tour-actions">
           {!isFirstStep && (
             <button className="btn btn-secondary" onClick={handlePrevious}>
-              ê Previous
+              Previous
             </button>
           )}
 
@@ -104,12 +114,12 @@ function WelcomeTour({ onComplete }) {
                 Skip Tour
               </button>
               <button className="btn btn-primary" onClick={handleNext}>
-                Next í
+                Next
               </button>
             </>
           ) : (
             <button className="btn btn-primary btn-lg" onClick={handleComplete}>
-              Get Started! <â
+              Get Started!
             </button>
           )}
         </div>
