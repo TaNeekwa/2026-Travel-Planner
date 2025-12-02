@@ -99,6 +99,7 @@ export const addTrip = async (userId, trip) => {
     if (!userId) throw new Error('User ID is required');
 
     console.log('📤 Adding trip to Firestore...');
+    console.log('📤 userId being saved:', userId);
 
     const newTrip = {
       ...trip,
@@ -106,6 +107,8 @@ export const addTrip = async (userId, trip) => {
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
+
+    console.log('📤 newTrip object with userId:', newTrip);
 
     // Add to Firestore
     const docRef = await addDoc(collection(db, TRIPS_COLLECTION), newTrip);

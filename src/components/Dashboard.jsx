@@ -6,6 +6,7 @@ import TripCard from './TripCard';
 import CalendarView from './CalendarView';
 import { getTripsByStatus } from '../utils/calculations';
 import { useAuth } from '../contexts/AuthContext';
+import { addTrip } from '../utils/firebaseStorage';
 
 function Dashboard({ trips, onViewTrip, onEditTrip, onDeleteTrip, onAddTrip }) {
   const { currentUser } = useAuth();
@@ -114,30 +115,48 @@ function Dashboard({ trips, onViewTrip, onEditTrip, onDeleteTrip, onAddTrip }) {
     alert(`Exported ${trips.length} trips successfully! Transfer this file to your phone to import.`);
   };
 
-  // Import trips from JSON file
-  const handleImportTrips = (event) => {
+  // Import trips from JSON file and upload to Firebase
+  const handleImportTrips = async (event) => {
     const file = event.target.files[0];
+    console.log('📤 Import started, file:', file);
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const importedTrips = JSON.parse(e.target.result);
+        console.log('📤 Parsed trips:', importedTrips.length);
 
         if (!Array.isArray(importedTrips)) {
           alert('Invalid file format. Please select a valid trips export file.');
           return;
         }
 
-        // Save to localStorage
-        const storageKey = `trips_${currentUser.uid}`;
-        localStorage.setItem(storageKey, JSON.stringify(importedTrips));
+        // Upload each trip to Firebase
+        console.log(`📤 Uploading ${importedTrips.length} trips to Firebase...`);
+        let successCount = 0;
+        let failCount = 0;
+
+        for (const trip of importedTrips) {
+          try {
+            console.log('📤 Uploading trip:', trip.name);
+            // Remove id, createdAt, updatedAt as they'll be regenerated
+            const { id, createdAt, updatedAt, ...tripData } = trip;
+            await addTrip(currentUser.uid, tripData);
+            successCount++;
+            console.log('✅ Trip uploaded:', trip.name);
+          } catch (error) {
+            console.error('❌ Error importing trip:', trip.name, error);
+            failCount++;
+          }
+        }
 
         // Reload the page to show imported trips
-        alert(`Successfully imported ${importedTrips.length} trips! Refreshing...`);
-        window.location.reload();
+        console.log(`✅ Import complete: ${successCount} success, ${failCount} failed`);
+        alert(`Successfully imported ${successCount} trips to Firebase!${failCount > 0 ? ` ${failCount} trips failed.` : ''}`);
+        setTimeout(() => window.location.reload(), 1000);
       } catch (error) {
-        console.error('Error importing trips:', error);
+        console.error('❌ Error importing trips:', error);
         alert('Failed to import trips. Please make sure the file is valid.');
       }
     };
