@@ -1,5 +1,43 @@
-// Storage utility functions for managing travel data
-// Using localStorage for simple, fast, browser-based storage
+// Firebase Firestore storage utility functions
+// Now using actual cloud storage with localStorage as backup
+
+import {
+  collection,
+  doc,
+  getDocs,
+  getDoc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  query,
+  where,
+  orderBy,
+  serverTimestamp,
+  Timestamp
+} from 'firebase/firestore';
+import { db } from '../firebase/config';
+
+// Collection name in Firestore
+const TRIPS_COLLECTION = 'trips';
+
+// Helper: Save trips to localStorage as backup
+const backupToLocalStorage = (userId, trips) => {
+  try {
+    const storageKey = `trips_${userId}`;
+    localStorage.setItem(storageKey, JSON.stringify(trips));
+    console.log('✅ Backup saved to localStorage');
+  } catch (error) {
+    console.error('Failed to backup to localStorage:', error);
+  }
+};
+
+// Helper: Convert Firestore timestamp to ISO string
+const convertTimestamp = (timestamp) => {
+  if (timestamp instanceof Timestamp) {
+    return timestamp.toDate().toISOString();
+  }
+  return timestamp;
+};
 
 // Load all trips for the current user
 export const loadTrips = async (userId) => {
@@ -9,25 +47,50 @@ export const loadTrips = async (userId) => {
       return [];
     }
 
-    // Load trips from localStorage
-    const storageKey = `trips_${userId}`;
-    const trips = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    console.log('📥 Loading trips from Firestore...');
 
-    // Sort by created date, newest first
-    trips.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    // Query trips for this user from Firestore
+    const tripsRef = collection(db, TRIPS_COLLECTION);
+    const q = query(
+      tripsRef,
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc')
+    );
 
-    console.log('Trips loaded from localStorage:', trips.length);
+    const querySnapshot = await getDocs(q);
+    const trips = [];
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      trips.push({
+        ...data,
+        id: doc.id,
+        createdAt: convertTimestamp(data.createdAt),
+        updatedAt: convertTimestamp(data.updatedAt),
+      });
+    });
+
+    console.log(`✅ Loaded ${trips.length} trips from Firestore`);
+
+    // Backup to localStorage
+    backupToLocalStorage(userId, trips);
+
     return trips;
   } catch (error) {
-    console.error('Error loading trips:', error);
-    return [];
-  }
-};
+    console.error('❌ Error loading trips from Firestore:', error);
 
-// Save trips (not used in Firebase - we use add/update/delete instead)
-export const saveTrips = async (userId, trips) => {
-  console.warn('saveTrips is not needed with Firebase. Use addTrip, updateTrip, or deleteTrip instead.');
-  return false;
+    // Fallback: Try to load from localStorage
+    console.log('⚠️ Attempting to load from localStorage backup...');
+    try {
+      const storageKey = `trips_${userId}`;
+      const backup = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      console.log(`📦 Loaded ${backup.length} trips from localStorage backup`);
+      return backup;
+    } catch (backupError) {
+      console.error('Failed to load from backup:', backupError);
+      return [];
+    }
+  }
 };
 
 // Add a new trip for the current user
@@ -35,32 +98,33 @@ export const addTrip = async (userId, trip) => {
   try {
     if (!userId) throw new Error('User ID is required');
 
-    // Use regular timestamps
-    const timestamp = new Date().toISOString();
-    const tripId = `trip_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    console.log('📤 Adding trip to Firestore...');
 
     const newTrip = {
       ...trip,
-      id: tripId,
       userId: userId,
-      createdAt: timestamp,
-      updatedAt: timestamp,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
     };
 
-    // Get existing trips from localStorage
-    const storageKey = `trips_${userId}`;
-    const existingTrips = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    // Add to Firestore
+    const docRef = await addDoc(collection(db, TRIPS_COLLECTION), newTrip);
 
-    // Add new trip
-    existingTrips.push(newTrip);
+    const addedTrip = {
+      ...newTrip,
+      id: docRef.id,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
 
-    // Save back to localStorage
-    localStorage.setItem(storageKey, JSON.stringify(existingTrips));
+    console.log('✅ Trip added to Firestore:', docRef.id);
 
-    console.log('Trip saved to localStorage:', newTrip);
-    return newTrip;
+    // Backup to localStorage
+    const trips = await loadTrips(userId);
+
+    return addedTrip;
   } catch (error) {
-    console.error('Error adding trip:', error);
+    console.error('❌ Error adding trip:', error);
     throw error;
   }
 };
@@ -71,27 +135,34 @@ export const updateTrip = async (userId, tripId, updates) => {
     if (!userId) throw new Error('User ID is required');
     if (!tripId) throw new Error('Trip ID is required');
 
-    // Load trips from localStorage
-    const storageKey = `trips_${userId}`;
-    const trips = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    console.log('📝 Updating trip in Firestore...');
 
-    // Find and update the trip
-    const tripIndex = trips.findIndex(t => t.id === tripId);
-    if (tripIndex === -1) throw new Error('Trip not found');
+    const tripRef = doc(db, TRIPS_COLLECTION, tripId);
 
-    trips[tripIndex] = {
-      ...trips[tripIndex],
+    const updateData = {
       ...updates,
-      updatedAt: new Date().toISOString(),
+      updatedAt: serverTimestamp(),
     };
 
-    // Save back to localStorage
-    localStorage.setItem(storageKey, JSON.stringify(trips));
+    await updateDoc(tripRef, updateData);
 
-    console.log('Trip updated in localStorage:', trips[tripIndex]);
-    return trips[tripIndex];
+    console.log('✅ Trip updated in Firestore');
+
+    // Get updated trip
+    const updatedDoc = await getDoc(tripRef);
+    const updatedTrip = {
+      ...updatedDoc.data(),
+      id: updatedDoc.id,
+      createdAt: convertTimestamp(updatedDoc.data().createdAt),
+      updatedAt: convertTimestamp(updatedDoc.data().updatedAt),
+    };
+
+    // Refresh backup
+    await loadTrips(userId);
+
+    return updatedTrip;
   } catch (error) {
-    console.error('Error updating trip:', error);
+    console.error('❌ Error updating trip:', error);
     throw error;
   }
 };
@@ -102,20 +173,19 @@ export const deleteTrip = async (userId, tripId) => {
     if (!userId) throw new Error('User ID is required');
     if (!tripId) throw new Error('Trip ID is required');
 
-    // Load trips from localStorage
-    const storageKey = `trips_${userId}`;
-    const trips = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    console.log('🗑️ Deleting trip from Firestore...');
 
-    // Filter out the trip to delete
-    const updatedTrips = trips.filter(t => t.id !== tripId);
+    const tripRef = doc(db, TRIPS_COLLECTION, tripId);
+    await deleteDoc(tripRef);
 
-    // Save back to localStorage
-    localStorage.setItem(storageKey, JSON.stringify(updatedTrips));
+    console.log('✅ Trip deleted from Firestore');
 
-    console.log('Trip deleted from localStorage');
+    // Refresh backup
+    await loadTrips(userId);
+
     return true;
   } catch (error) {
-    console.error('Error deleting trip:', error);
+    console.error('❌ Error deleting trip:', error);
     throw error;
   }
 };
@@ -126,17 +196,48 @@ export const getTripById = async (userId, tripId) => {
     if (!userId) throw new Error('User ID is required');
     if (!tripId) throw new Error('Trip ID is required');
 
-    // Load trips from localStorage
-    const storageKey = `trips_${userId}`;
-    const trips = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    console.log('🔍 Getting trip from Firestore...');
 
-    // Find the trip
-    const trip = trips.find(t => t.id === tripId);
+    const tripRef = doc(db, TRIPS_COLLECTION, tripId);
+    const tripDoc = await getDoc(tripRef);
 
-    console.log('Trip retrieved from localStorage:', trip);
-    return trip || null;
+    if (!tripDoc.exists()) {
+      console.log('Trip not found');
+      return null;
+    }
+
+    const trip = {
+      ...tripDoc.data(),
+      id: tripDoc.id,
+      createdAt: convertTimestamp(tripDoc.data().createdAt),
+      updatedAt: convertTimestamp(tripDoc.data().updatedAt),
+    };
+
+    console.log('✅ Trip retrieved from Firestore');
+    return trip;
   } catch (error) {
-    console.error('Error getting trip:', error);
+    console.error('❌ Error getting trip:', error);
     return null;
+  }
+};
+
+// Export trips data (for manual backup)
+export const exportTrips = async (userId) => {
+  try {
+    const trips = await loadTrips(userId);
+    const dataStr = JSON.stringify(trips, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `travel-planner-backup-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+
+    URL.revokeObjectURL(url);
+    console.log('✅ Trips exported successfully');
+  } catch (error) {
+    console.error('❌ Error exporting trips:', error);
+    throw error;
   }
 };
