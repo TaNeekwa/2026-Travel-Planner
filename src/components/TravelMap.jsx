@@ -4,6 +4,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { getTripLocations } from '../utils/geocoding';
 import { formatDate } from '../utils/calculations';
+import LocationAutocomplete from './LocationAutocomplete';
 
 // Fix for default marker icons in React Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -199,14 +200,11 @@ function TravelMap({ trips, onMarkerClick, onAddPastTrip }) {
             <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label htmlFor="destination">Destination *</label>
-                <input
-                  type="text"
-                  id="destination"
-                  name="destination"
+                <LocationAutocomplete
                   value={pastTripData.destination}
-                  onChange={handleInputChange}
-                  placeholder="e.g., Paris, France or Tokyo, Japan"
-                  required
+                  onChange={(value) => setPastTripData({ ...pastTripData, destination: value })}
+                  placeholder="Start typing a city... (e.g., Paris, Tokyo)"
+                  required={true}
                 />
               </div>
 

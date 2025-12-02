@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import LocationAutocomplete from './LocationAutocomplete';
 
 function TripForm({ trip, onSave, onCancel }) {
   const defaultFormData = {
@@ -375,13 +376,11 @@ function TripForm({ trip, onSave, onCancel }) {
 
           <div className="form-group">
             <label htmlFor="destination">Destination</label>
-            <input
-              type="text"
-              id="destination"
-              name="destination"
+            <LocationAutocomplete
               value={formData.destination}
-              onChange={handleChange}
-              placeholder="e.g., Tokyo, Japan"
+              onChange={(value) => handleChange({ target: { name: 'destination', value } })}
+              placeholder="Start typing a city... (e.g., New York, Tokyo, Paris)"
+              required={false}
             />
           </div>
 
