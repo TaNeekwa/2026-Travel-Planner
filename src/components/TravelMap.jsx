@@ -1,5 +1,5 @@
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from 'react-leaflet';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { getTripLocations } from '../utils/geocoding';
@@ -18,7 +18,7 @@ const createCustomIcon = (status) => {
   const colors = {
     upcoming: '#2563eb',    // Blue
     active: '#10b981',      // Green
-    completed: '#64748b',   // Gray
+    completed: '#ff1493',   // Hot Pink
   };
 
   const color = colors[status] || colors.upcoming;
@@ -69,12 +69,54 @@ function FitBounds({ locations }) {
   return null;
 }
 
-function TravelMap({ trips, onMarkerClick }) {
+function TravelMap({ trips, onMarkerClick, onAddPastTrip }) {
   const locations = getTripLocations(trips);
+  const [showModal, setShowModal] = useState(false);
+  const [pastTripData, setPastTripData] = useState({
+    destination: '',
+    startDate: '',
+    endDate: '',
+    description: '',
+  });
 
   // Default center (center of US) if no trips
   const defaultCenter = [39.8283, -98.5795];
   const defaultZoom = 4;
+
+  const handleInputChange = (e) => {
+    setPastTripData({
+      ...pastTripData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!pastTripData.destination || !pastTripData.startDate || !pastTripData.endDate) {
+      alert('Please fill in destination and dates');
+      return;
+    }
+
+    // Create a completed trip
+    const newPastTrip = {
+      name: `${pastTripData.destination} Trip`,
+      destination: pastTripData.destination,
+      startDate: pastTripData.startDate,
+      endDate: pastTripData.endDate,
+      description: pastTripData.description,
+      baseCost: 0,
+      isBooked: true,
+      currency: 'USD',
+    };
+
+    if (onAddPastTrip) {
+      onAddPastTrip(newPastTrip);
+    }
+
+    // Reset form and close modal
+    setPastTripData({ destination: '', startDate: '', endDate: '', description: '' });
+    setShowModal(false);
+  };
 
   return (
     <div className="travel-map-container">
@@ -90,7 +132,7 @@ function TravelMap({ trips, onMarkerClick }) {
             <span>Active</span>
           </div>
           <div className="legend-item">
-            <span className="legend-marker" style={{ backgroundColor: '#64748b' }}></span>
+            <span className="legend-marker" style={{ backgroundColor: '#ff1493' }}></span>
             <span>Completed</span>
           </div>
         </div>
@@ -134,9 +176,88 @@ function TravelMap({ trips, onMarkerClick }) {
         </MapContainer>
       )}
 
-      {locations.length > 0 && (
-        <div className="map-footer">
+      <div className="map-footer">
+        <button
+          className="btn btn-sm btn-secondary"
+          onClick={() => setShowModal(true)}
+          style={{ marginRight: 'auto' }}
+        >
+          + Add Past Trip
+        </button>
+        {locations.length > 0 && (
           <span>{locations.length} destination{locations.length !== 1 ? 's' : ''} mapped</span>
+        )}
+      </div>
+
+      {showModal && (
+        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2>Add Past Trip</h2>
+            <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
+              Add a trip you've already completed to see it on your map with a hot pink marker!
+            </p>
+            <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label htmlFor="destination">Destination *</label>
+                <input
+                  type="text"
+                  id="destination"
+                  name="destination"
+                  value={pastTripData.destination}
+                  onChange={handleInputChange}
+                  placeholder="e.g., Paris, France or Tokyo, Japan"
+                  required
+                />
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="startDate">Start Date *</label>
+                  <input
+                    type="date"
+                    id="startDate"
+                    name="startDate"
+                    value={pastTripData.startDate}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="endDate">End Date *</label>
+                  <input
+                    type="date"
+                    id="endDate"
+                    name="endDate"
+                    value={pastTripData.endDate}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="description">Details (Optional)</label>
+                <textarea
+                  id="description"
+                  name="description"
+                  value={pastTripData.description}
+                  onChange={handleInputChange}
+                  placeholder="Share some memories or highlights from this trip..."
+                  rows="3"
+                />
+              </div>
+
+              <div className="form-actions">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  Add to Map
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

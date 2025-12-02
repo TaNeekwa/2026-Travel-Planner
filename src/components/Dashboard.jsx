@@ -7,7 +7,7 @@ import CalendarView from './CalendarView';
 import { getTripsByStatus } from '../utils/calculations';
 import { useAuth } from '../contexts/AuthContext';
 
-function Dashboard({ trips, onViewTrip, onEditTrip, onDeleteTrip }) {
+function Dashboard({ trips, onViewTrip, onEditTrip, onDeleteTrip, onAddTrip }) {
   const { currentUser } = useAuth();
   const [filter, setFilter] = useState('all');
   const [sortBy, setSortBy] = useState('date');
@@ -151,7 +151,7 @@ function Dashboard({ trips, onViewTrip, onEditTrip, onDeleteTrip }) {
     <div className="dashboard">
       <TravelStats trips={trips} />
 
-      <TravelMap trips={trips} onMarkerClick={onViewTrip} />
+      <TravelMap trips={trips} onMarkerClick={onViewTrip} onAddPastTrip={onAddTrip} />
 
       <BudgetOverview trips={trips} tripsByStatus={tripsByStatus} />
 

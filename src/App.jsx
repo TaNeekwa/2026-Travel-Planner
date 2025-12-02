@@ -226,6 +226,7 @@ function App() {
             onViewTrip={handleViewTrip}
             onEditTrip={handleEditTrip}
             onDeleteTrip={handleDeleteTrip}
+            onAddTrip={handleAddTrip}
           />
         )}
 
