@@ -119,50 +119,14 @@ function TravelMap({ trips, onMarkerClick }) {
               icon={createCustomIcon(location.status)}
               eventHandlers={{
                 click: () => {
-                  if (onMarkerClick) {
-                    const trip = trips.find(t => t.id === location.id);
-                    onMarkerClick(trip);
-                  }
+                  const tiktokUrl = `https://www.tiktok.com/search?q=${encodeURIComponent(location.destination + ' travel')}`;
+                  window.open(tiktokUrl, '_blank', 'noopener,noreferrer');
                 },
               }}
             >
               <Tooltip permanent direction="top" offset={[0, -20]} className="map-label">
                 {location.destination}
               </Tooltip>
-              <Popup>
-                <div className="map-popup">
-                  <strong>{location.name}</strong>
-                  <div className="popup-destination">{location.destination}</div>
-                  <div className="popup-dates">
-                    {formatDate(location.startDate)} - {formatDate(location.endDate)}
-                  </div>
-                  <div className={`popup-status status-${location.status}`}>
-                    {location.status.charAt(0).toUpperCase() + location.status.slice(1)}
-                  </div>
-                  <a
-                    href={`https://www.tiktok.com/search?q=${encodeURIComponent(location.destination + ' travel')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="popup-tiktok-btn"
-                    style={{
-                      display: 'inline-block',
-                      marginTop: '0.5rem',
-                      padding: '0.4rem 0.8rem',
-                      backgroundColor: '#000',
-                      color: '#fff',
-                      textDecoration: 'none',
-                      borderRadius: '0.375rem',
-                      fontSize: '0.875rem',
-                      fontWeight: '600',
-                      transition: 'background-color 0.2s',
-                    }}
-                    onMouseOver={(e) => e.target.style.backgroundColor = '#ff0050'}
-                    onMouseOut={(e) => e.target.style.backgroundColor = '#000'}
-                  >
-                    🎬 See on TikTok
-                  </a>
-                </div>
-              </Popup>
             </Marker>
           ))}
 
