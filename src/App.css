@@ -1199,6 +1199,8 @@
   gap: 1rem;
   flex: 1;
   min-width: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .weather-day {
@@ -1300,6 +1302,8 @@
   justify-content: center;
   padding: 0;
   line-height: 1;
+  z-index: 10;
+  position: relative;
 }
 
 .weather-nav:hover:not(:disabled) {

@@ -16,7 +16,11 @@ import './App.css';
 function App() {
   const { currentUser, logout } = useAuth();
   const [trips, setTrips] = useState([]);
-  const [currentView, setCurrentView] = useState('dashboard');
+  const [currentView, setCurrentView] = useState(() => {
+    // Restore view from localStorage on page load
+    const savedView = localStorage.getItem('currentView');
+    return savedView || 'dashboard';
+  });
   const [selectedTrip, setSelectedTrip] = useState(null);
   const [authView, setAuthView] = useState('login'); // 'login' or 'signup'
   const [darkMode, setDarkMode] = useState(() => {
@@ -35,6 +39,33 @@ function App() {
       offset: 100,
     });
   }, []);
+
+  // Persist current view to localStorage
+  useEffect(() => {
+    localStorage.setItem('currentView', currentView);
+  }, [currentView]);
+
+  // Persist selected trip ID to localStorage
+  useEffect(() => {
+    if (selectedTrip) {
+      localStorage.setItem('selectedTripId', selectedTrip.id);
+    } else {
+      localStorage.removeItem('selectedTripId');
+    }
+  }, [selectedTrip]);
+
+  // Restore selected trip after trips are loaded
+  useEffect(() => {
+    if (trips.length > 0 && !selectedTrip) {
+      const savedTripId = localStorage.getItem('selectedTripId');
+      if (savedTripId) {
+        const trip = trips.find(t => t.id === savedTripId);
+        if (trip) {
+          setSelectedTrip(trip);
+        }
+      }
+    }
+  }, [trips]);
 
   // Handle browser back button
   useEffect(() => {
@@ -55,9 +86,14 @@ function App() {
 
     window.addEventListener('popstate', handlePopState);
 
-    // Set initial state
+    // Set initial state from saved view
     if (!window.history.state) {
-      window.history.replaceState({ view: 'dashboard' }, '');
+      const savedView = localStorage.getItem('currentView') || 'dashboard';
+      const savedTripId = localStorage.getItem('selectedTripId');
+      window.history.replaceState({
+        view: savedView,
+        tripId: savedTripId
+      }, '');
     }
 
     return () => window.removeEventListener('popstate', handlePopState);
