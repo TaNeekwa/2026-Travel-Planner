@@ -404,6 +404,10 @@ function TripForm({ trip, onSave, onCancel }) {
                 className="date-picker-input"
                 required
                 minDate={new Date()}
+                showMonthDropdown
+                showYearDropdown
+                dropdownMode="select"
+                yearDropdownItemNumber={15}
               />
             </div>
 
@@ -423,6 +427,10 @@ function TripForm({ trip, onSave, onCancel }) {
                 required
                 minDate={formData.startDate ? new Date(formData.startDate) : new Date()}
                 openToDate={formData.startDate ? new Date(formData.startDate) : new Date()}
+                showMonthDropdown
+                showYearDropdown
+                dropdownMode="select"
+                yearDropdownItemNumber={15}
               />
             </div>
           </div>
