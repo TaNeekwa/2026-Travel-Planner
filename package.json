@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "aos": "^2.3.4",
-    "firebase": "^12.6.0",
+    "firebase": "^10.14.1",
     "leaflet": "^1.9.4",
     "react": "^19.2.0",
     "react-datepicker": "^8.10.0",
