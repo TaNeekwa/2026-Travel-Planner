@@ -4,6 +4,7 @@ import TripDetail from './components/TripDetail';
 import TripForm from './components/TripForm';
 import CurrencyConverter from './components/CurrencyConverter';
 import ProfileSettings from './components/ProfileSettings';
+import WelcomeTour from './components/WelcomeTour';
 import Login from './components/Login';
 import Signup from './components/Signup';
 import { useAuth } from './contexts/AuthContext';
@@ -21,6 +22,7 @@ function App() {
     return saved === 'true';
   });
   const [loading, setLoading] = useState(true);
+  const [showWelcomeTour, setShowWelcomeTour] = useState(false);
 
   // Load trips when user is authenticated
   useEffect(() => {
@@ -30,6 +32,12 @@ function App() {
         try {
           const loadedTrips = await loadTrips(currentUser.uid);
           setTrips(loadedTrips);
+
+          // Check if user has seen welcome tour
+          const hasSeenTour = localStorage.getItem(`welcomeTour_${currentUser.uid}`);
+          if (!hasSeenTour) {
+            setShowWelcomeTour(true);
+          }
         } catch (error) {
           console.error('Error fetching trips:', error);
         } finally {
@@ -119,6 +127,13 @@ function App() {
   const handleBackToDashboard = () => {
     setSelectedTrip(null);
     setCurrentView('dashboard');
+  };
+
+  const handleCompleteTour = () => {
+    if (currentUser) {
+      localStorage.setItem(`welcomeTour_${currentUser.uid}`, 'true');
+    }
+    setShowWelcomeTour(false);
   };
 
   // Show auth screens if user is not logged in
@@ -246,6 +261,8 @@ function App() {
           <ProfileSettings onBack={handleBackToDashboard} />
         )}
       </main>
+
+      {showWelcomeTour && <WelcomeTour onComplete={handleCompleteTour} />}
     </div>
   );
 }
