@@ -149,11 +149,17 @@ function Dashboard({ trips, onViewTrip, onEditTrip, onDeleteTrip, onAddTrip }) {
 
   return (
     <div className="dashboard">
-      <TravelStats trips={trips} />
+      <div data-aos="fade-up">
+        <TravelStats trips={trips} />
+      </div>
 
-      <TravelMap trips={trips} onMarkerClick={onViewTrip} onAddPastTrip={onAddTrip} />
+      <div data-aos="fade-up" data-aos-delay="100">
+        <TravelMap trips={trips} onMarkerClick={onViewTrip} onAddPastTrip={onAddTrip} />
+      </div>
 
-      <BudgetOverview trips={trips} tripsByStatus={tripsByStatus} />
+      <div data-aos="fade-up" data-aos-delay="200">
+        <BudgetOverview trips={trips} tripsByStatus={tripsByStatus} />
+      </div>
 
       <div className="dashboard-controls">
         <div className="search-bar">
@@ -275,18 +281,19 @@ function Dashboard({ trips, onViewTrip, onEditTrip, onDeleteTrip, onAddTrip }) {
               )}
 
               <div className="trips-carousel" ref={carouselRef}>
-                {sortedTrips.map(trip => (
-                  <TripCard
-                    key={trip.id}
-                    trip={trip}
-                    onView={() => onViewTrip(trip)}
-                    onEdit={() => onEditTrip(trip)}
-                    onDelete={() => {
-                      if (window.confirm(`Are you sure you want to delete "${trip.name}"?`)) {
-                        onDeleteTrip(trip.id);
-                      }
-                    }}
-                  />
+                {sortedTrips.map((trip, index) => (
+                  <div key={trip.id} data-aos="zoom-in" data-aos-delay={index * 100}>
+                    <TripCard
+                      trip={trip}
+                      onView={() => onViewTrip(trip)}
+                      onEdit={() => onEditTrip(trip)}
+                      onDelete={() => {
+                        if (window.confirm(`Are you sure you want to delete "${trip.name}"?`)) {
+                          onDeleteTrip(trip.id);
+                        }
+                      }}
+                    />
+                  </div>
                 ))}
               </div>
 

@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 import Dashboard from './components/Dashboard';
 import TripDetail from './components/TripDetail';
 import TripForm from './components/TripForm';
@@ -23,6 +25,16 @@ function App() {
   });
   const [loading, setLoading] = useState(true);
   const [showWelcomeTour, setShowWelcomeTour] = useState(false);
+
+  // Initialize AOS (Animate On Scroll)
+  useEffect(() => {
+    AOS.init({
+      duration: 800,
+      easing: 'ease-in-out',
+      once: true,
+      offset: 100,
+    });
+  }, []);
 
   // Handle browser back button
   useEffect(() => {
