@@ -2,6 +2,7 @@ import { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import LocationAutocomplete from './LocationAutocomplete';
+import { getCurrencyFromDestination } from '../utils/currencyMapping';
 
 function TripForm({ trip, onSave, onCancel }) {
   const defaultFormData = {
@@ -381,10 +382,21 @@ function TripForm({ trip, onSave, onCancel }) {
               <label htmlFor="destination">Destination</label>
               <LocationAutocomplete
                 value={formData.destination}
-                onChange={(value) => handleChange({ target: { name: 'destination', value } })}
+                onChange={(value) => {
+                  // Update destination
+                  handleChange({ target: { name: 'destination', value } });
+                  // Auto-detect and update currency based on destination
+                  const detectedCurrency = getCurrencyFromDestination(value);
+                  handleChange({ target: { name: 'currency', value: detectedCurrency } });
+                }}
                 placeholder="Start typing a city... (e.g., New York, Tokyo, Paris)"
                 required={false}
               />
+              {formData.destination && formData.currency && (
+                <small style={{ color: 'var(--text-secondary)', marginTop: '0.25rem', display: 'block' }}>
+                  Auto-detected currency: {formData.currency}
+                </small>
+              )}
             </div>
           </div>
 

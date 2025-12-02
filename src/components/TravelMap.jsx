@@ -5,6 +5,7 @@ import 'leaflet/dist/leaflet.css';
 import { getTripLocations } from '../utils/geocoding';
 import { formatDate } from '../utils/calculations';
 import LocationAutocomplete from './LocationAutocomplete';
+import { getCurrencyFromDestination } from '../utils/currencyMapping';
 
 // Fix for default marker icons in React Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -98,6 +99,9 @@ function TravelMap({ trips, onMarkerClick, onAddPastTrip }) {
       return;
     }
 
+    // Auto-detect currency from destination
+    const detectedCurrency = getCurrencyFromDestination(pastTripData.destination);
+
     // Create a completed trip
     const newPastTrip = {
       name: `${pastTripData.destination} Trip`,
@@ -107,7 +111,7 @@ function TravelMap({ trips, onMarkerClick, onAddPastTrip }) {
       description: pastTripData.description,
       baseCost: 0,
       isBooked: true,
-      currency: 'USD',
+      currency: detectedCurrency,
     };
 
     if (onAddPastTrip) {
