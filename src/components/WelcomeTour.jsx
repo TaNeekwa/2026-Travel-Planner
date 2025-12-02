@@ -83,6 +83,9 @@ function WelcomeTour({ onComplete }) {
         <div className="welcome-tour-content">
           <div className="welcome-tour-icon">{step.icon}</div>
           <h2>{step.title}</h2>
+          {isFirstStep && (
+            <p className="built-by">Built by Naomi</p>
+          )}
           <p>{step.content}</p>
 
           <div className="welcome-tour-progress">
@@ -178,8 +181,16 @@ function WelcomeTour({ onComplete }) {
 
         .welcome-tour-content h2 {
           color: var(--primary-color);
-          margin-bottom: 1rem;
+          margin-bottom: 0.5rem;
           font-size: 1.75rem;
+        }
+
+        .built-by {
+          font-size: 0.875rem;
+          color: var(--text-secondary);
+          font-style: italic;
+          margin-bottom: 1.5rem !important;
+          opacity: 0.8;
         }
 
         .welcome-tour-content p {
