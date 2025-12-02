@@ -5,7 +5,7 @@ function WelcomeTour({ onComplete }) {
 
   const steps = [
     {
-      title: 'Welcome to Your 2026 Travel Planner!',
+      title: 'Welcome to Your Travel Planner!',
       content: "We're excited to help you plan your adventures! Let's take a quick tour to show you around.",
       icon: '🎉',
     },

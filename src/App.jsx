@@ -198,7 +198,7 @@ function App() {
     <div className="app">
       <header className="app-header">
         <h1 onClick={handleBackToDashboard} style={{ cursor: 'pointer' }}>
-          ✈️ 2026 Travel Planner
+          ✈️ Travel Planner
         </h1>
         <div className="header-actions">
           <span className="user-greeting">
