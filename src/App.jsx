@@ -299,13 +299,6 @@ function App() {
           >
             ⚙️
           </button>
-          <button
-            className="btn btn-danger"
-            onClick={handleLogout}
-            title="Logout"
-          >
-            Logout
-          </button>
         </div>
       </header>
 
@@ -349,7 +342,7 @@ function App() {
         )}
 
         {currentView === 'settings' && (
-          <ProfileSettings onBack={handleBackToDashboard} />
+          <ProfileSettings onBack={handleBackToDashboard} onLogout={handleLogout} />
         )}
       </main>
 

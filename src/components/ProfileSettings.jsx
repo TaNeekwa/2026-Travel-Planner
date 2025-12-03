@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { updateProfile, updateEmail, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 import { useAuth } from '../contexts/AuthContext';
 
-function ProfileSettings({ onBack }) {
+function ProfileSettings({ onBack, onLogout }) {
   const { currentUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -122,7 +122,7 @@ function ProfileSettings({ onBack }) {
     <div className="profile-settings">
       <div className="settings-header">
         <button className="btn btn-secondary" onClick={onBack}>
-          ê Back to Dashboard
+          ÔøΩ Back to Dashboard
         </button>
         <h2>Account Settings</h2>
       </div>
@@ -272,6 +272,20 @@ function ProfileSettings({ onBack }) {
               {new Date(currentUser.metadata.lastSignInTime).toLocaleDateString()}
             </span>
           </div>
+        </div>
+
+        <div className="settings-card" style={{ marginTop: '1.5rem', borderColor: '#ef4444' }}>
+          <h3 style={{ color: '#ef4444' }}>Danger Zone</h3>
+          <p style={{ marginBottom: '1rem', color: '#6b7280' }}>
+            Sign out of your account
+          </p>
+          <button
+            className="btn btn-danger btn-lg"
+            onClick={onLogout}
+            style={{ width: '100%' }}
+          >
+            üö™ Logout
+          </button>
         </div>
       </div>
     </div>
