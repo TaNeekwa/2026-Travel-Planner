@@ -383,11 +383,14 @@ function TripForm({ trip, onSave, onCancel }) {
               <LocationAutocomplete
                 value={formData.destination}
                 onChange={(value) => {
-                  // Update destination
-                  handleChange({ target: { name: 'destination', value } });
-                  // Auto-detect and update currency based on destination
+                  // Auto-detect currency based on destination
                   const detectedCurrency = getCurrencyFromDestination(value);
-                  handleChange({ target: { name: 'currency', value: detectedCurrency } });
+                  // Update both destination and currency in a single state update
+                  setFormData({
+                    ...formData,
+                    destination: value,
+                    currency: detectedCurrency,
+                  });
                 }}
                 placeholder="Start typing a city... (e.g., New York, Tokyo, Paris)"
                 required={false}
