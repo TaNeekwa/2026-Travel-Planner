@@ -51,7 +51,7 @@ function TravelStats({ trips }) {
 
   return (
     <div className="travel-stats">
-      <h2>Your 2026 Travel Statistics</h2>
+      <h2>Your Travel Statistics</h2>
 
       <div className="stats-highlight-grid">
         <div className="stat-highlight stat-primary">
