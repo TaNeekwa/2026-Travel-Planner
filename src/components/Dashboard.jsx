@@ -7,11 +7,12 @@ import CalendarView from './CalendarView';
 import { getTripsByStatus } from '../utils/calculations';
 
 function Dashboard({ trips, onViewTrip, onEditTrip, onDeleteTrip, onAddTrip }) {
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState('active');
   const [sortBy, setSortBy] = useState('date');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'calendar'
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState('all');
+  const [showFilters, setShowFilters] = useState(false);
   const carouselRef = useRef(null);
 
   const tripsByStatus = getTripsByStatus(trips);
@@ -138,41 +139,49 @@ function Dashboard({ trips, onViewTrip, onEditTrip, onDeleteTrip, onAddTrip }) {
           </button>
         </div>
 
-        {viewMode === 'grid' && (
-          <>
-            <div className="filter-group">
-              <label>Filter:</label>
-              <select value={filter} onChange={(e) => setFilter(e.target.value)}>
-                <option value="all">All Trips ({trips.length})</option>
-                <option value="upcoming">Upcoming ({tripsByStatus.upcoming.length})</option>
-                <option value="active">Active ({tripsByStatus.active.length})</option>
-                <option value="completed">Completed ({tripsByStatus.completed.length})</option>
-              </select>
-            </div>
-
-            <div className="filter-group">
-              <label>Sort by:</label>
-              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-                <option value="date">Date</option>
-                <option value="name">Name</option>
-                <option value="cost">Cost</option>
-              </select>
-            </div>
-
-            {allTags.length > 0 && (
-              <div className="filter-group">
-                <label>Tag:</label>
-                <select value={selectedTag} onChange={(e) => setSelectedTag(e.target.value)}>
-                  <option value="all">All Tags</option>
-                  {allTags.map(tag => (
-                    <option key={tag} value={tag}>{tag}</option>
-                  ))}
-                </select>
-              </div>
-            )}
-          </>
-        )}
+        <button
+          className={`btn btn-sm ${showFilters ? 'btn-primary' : 'btn-secondary'}`}
+          onClick={() => setShowFilters(!showFilters)}
+          style={{ marginLeft: 'auto' }}
+        >
+          🔍 Filter
+        </button>
       </div>
+
+      {showFilters && viewMode === 'grid' && (
+        <div className="filter-controls-panel">
+          <div className="filter-group">
+            <label>Filter:</label>
+            <select value={filter} onChange={(e) => setFilter(e.target.value)}>
+              <option value="all">All Trips ({trips.length})</option>
+              <option value="upcoming">Upcoming ({tripsByStatus.upcoming.length})</option>
+              <option value="active">Active ({tripsByStatus.active.length})</option>
+              <option value="completed">Completed ({tripsByStatus.completed.length})</option>
+            </select>
+          </div>
+
+          <div className="filter-group">
+            <label>Sort by:</label>
+            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+              <option value="date">Date</option>
+              <option value="name">Name</option>
+              <option value="cost">Cost</option>
+            </select>
+          </div>
+
+          {allTags.length > 0 && (
+            <div className="filter-group">
+              <label>Tag:</label>
+              <select value={selectedTag} onChange={(e) => setSelectedTag(e.target.value)}>
+                <option value="all">All Tags</option>
+                {allTags.map(tag => (
+                  <option key={tag} value={tag}>{tag}</option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+      )}
 
       {viewMode === 'calendar' ? (
         <CalendarView trips={trips} onViewTrip={onViewTrip} />
