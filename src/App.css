@@ -495,7 +495,8 @@
 
   .monthly-payments-section,
   .currency-converter-inline {
-    min-width: 100%;
+    min-width: 0;
+    width: 100%;
     flex: 1;
   }
 }
