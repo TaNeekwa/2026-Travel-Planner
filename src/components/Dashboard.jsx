@@ -5,17 +5,13 @@ import TravelMap from './TravelMap';
 import TripCard from './TripCard';
 import CalendarView from './CalendarView';
 import { getTripsByStatus } from '../utils/calculations';
-import { useAuth } from '../contexts/AuthContext';
-import { addTrip } from '../utils/firebaseStorage';
 
 function Dashboard({ trips, onViewTrip, onEditTrip, onDeleteTrip, onAddTrip }) {
-  const { currentUser } = useAuth();
   const [filter, setFilter] = useState('all');
   const [sortBy, setSortBy] = useState('date');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'calendar'
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState('all');
-  const fileInputRef = useRef(null);
   const carouselRef = useRef(null);
 
   const tripsByStatus = getTripsByStatus(trips);
@@ -94,78 +90,6 @@ function Dashboard({ trips, onViewTrip, onEditTrip, onDeleteTrip, onAddTrip }) {
     }
   };
 
-  // Export trips to JSON file
-  const handleExportTrips = () => {
-    if (trips.length === 0) {
-      alert('No trips to export!');
-      return;
-    }
-
-    const dataStr = JSON.stringify(trips, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `travel-planner-trips-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-
-    alert(`Exported ${trips.length} trips successfully! Transfer this file to your phone to import.`);
-  };
-
-  // Import trips from JSON file and upload to Firebase
-  const handleImportTrips = async (event) => {
-    const file = event.target.files[0];
-    console.log('📤 Import started, file:', file);
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      try {
-        const importedTrips = JSON.parse(e.target.result);
-        console.log('📤 Parsed trips:', importedTrips.length);
-
-        if (!Array.isArray(importedTrips)) {
-          alert('Invalid file format. Please select a valid trips export file.');
-          return;
-        }
-
-        // Upload each trip to Firebase
-        console.log(`📤 Uploading ${importedTrips.length} trips to Firebase...`);
-        let successCount = 0;
-        let failCount = 0;
-
-        for (const trip of importedTrips) {
-          try {
-            console.log('📤 Uploading trip:', trip.name);
-            // Remove id, createdAt, updatedAt as they'll be regenerated
-            const { id, createdAt, updatedAt, ...tripData } = trip;
-            await addTrip(currentUser.uid, tripData);
-            successCount++;
-            console.log('✅ Trip uploaded:', trip.name);
-          } catch (error) {
-            console.error('❌ Error importing trip:', trip.name, error);
-            failCount++;
-          }
-        }
-
-        // Reload the page to show imported trips
-        console.log(`✅ Import complete: ${successCount} success, ${failCount} failed`);
-        alert(`Successfully imported ${successCount} trips to Firebase!${failCount > 0 ? ` ${failCount} trips failed.` : ''}`);
-        setTimeout(() => window.location.reload(), 1000);
-      } catch (error) {
-        console.error('❌ Error importing trips:', error);
-        alert('Failed to import trips. Please make sure the file is valid.');
-      }
-    };
-    reader.readAsText(file);
-
-    // Reset file input
-    event.target.value = '';
-  };
-
   return (
     <div className="dashboard">
       <div data-aos="fade-up">
@@ -212,30 +136,6 @@ function Dashboard({ trips, onViewTrip, onEditTrip, onDeleteTrip, onAddTrip }) {
           >
             📅 Calendar View
           </button>
-        </div>
-
-        <div className="export-import-controls" style={{ display: 'flex', gap: '0.5rem' }}>
-          <button
-            className="btn btn-sm btn-secondary"
-            onClick={handleExportTrips}
-            title="Download trips to transfer to another device"
-          >
-            📥 Export Trips
-          </button>
-          <button
-            className="btn btn-sm btn-secondary"
-            onClick={() => fileInputRef.current?.click()}
-            title="Load trips from another device"
-          >
-            📤 Import Trips
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".json"
-            onChange={handleImportTrips}
-            style={{ display: 'none' }}
-          />
         </div>
 
         {viewMode === 'grid' && (
