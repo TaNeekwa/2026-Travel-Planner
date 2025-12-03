@@ -13,13 +13,38 @@ import { useAuth } from './contexts/AuthContext';
 import { loadTrips, addTrip, updateTrip, deleteTrip } from './utils/firebaseStorage';
 import './App.css';
 
+// Helper functions for URL-based routing
+const getRouteFromHash = () => {
+  const hash = window.location.hash.slice(1) || '/'; // Remove # and default to /
+  const parts = hash.split('/').filter(Boolean);
+
+  if (!parts.length || parts[0] === '') return { view: 'dashboard', tripId: null };
+  if (parts[0] === 'trip' && parts[1]) return { view: 'detail', tripId: parts[1] };
+  if (parts[0] === 'trip' && parts[1] && parts[2] === 'edit') return { view: 'edit', tripId: parts[1] };
+  if (parts[0] === 'add') return { view: 'add', tripId: null };
+  if (parts[0] === 'converter') return { view: 'converter', tripId: null };
+  if (parts[0] === 'settings') return { view: 'settings', tripId: null };
+
+  return { view: 'dashboard', tripId: null };
+};
+
+const setRouteHash = (view, tripId = null) => {
+  if (view === 'dashboard') window.location.hash = '/';
+  else if (view === 'detail' && tripId) window.location.hash = `/trip/${tripId}`;
+  else if (view === 'edit' && tripId) window.location.hash = `/trip/${tripId}/edit`;
+  else if (view === 'add') window.location.hash = '/add';
+  else if (view === 'converter') window.location.hash = '/converter';
+  else if (view === 'settings') window.location.hash = '/settings';
+  else window.location.hash = '/';
+};
+
 function App() {
   const { currentUser, logout } = useAuth();
   const [trips, setTrips] = useState([]);
   const [currentView, setCurrentView] = useState(() => {
-    // Restore view from localStorage on page load
-    const savedView = localStorage.getItem('currentView');
-    return savedView || 'dashboard';
+    // Initialize view from URL hash
+    const route = getRouteFromHash();
+    return route.view;
   });
   const [selectedTrip, setSelectedTrip] = useState(null);
   const [authView, setAuthView] = useState('login'); // 'login' or 'signup'
@@ -40,72 +65,51 @@ function App() {
     });
   }, []);
 
-  // Persist current view to localStorage
+  // Handle URL hash changes (browser back/forward, URL edits)
   useEffect(() => {
-    localStorage.setItem('currentView', currentView);
-  }, [currentView]);
+    const handleHashChange = () => {
+      const route = getRouteFromHash();
+      setCurrentView(route.view);
 
-  // Persist selected trip ID to localStorage
-  useEffect(() => {
-    if (selectedTrip) {
-      localStorage.setItem('selectedTripId', selectedTrip.id);
-    } else {
-      localStorage.removeItem('selectedTripId');
-    }
-  }, [selectedTrip]);
-
-  // Restore selected trip after trips are loaded
-  useEffect(() => {
-    if (trips.length > 0 && !selectedTrip) {
-      const savedTripId = localStorage.getItem('selectedTripId');
-      const savedView = localStorage.getItem('currentView');
-
-      if (savedTripId && (savedView === 'detail' || savedView === 'edit')) {
-        const trip = trips.find(t => t.id === savedTripId);
+      // If route has a tripId, find and set the trip
+      if (route.tripId && trips.length > 0) {
+        const trip = trips.find(t => t.id === route.tripId);
         if (trip) {
           setSelectedTrip(trip);
-          console.log('Restored trip on refresh:', trip.name);
         } else {
-          // Trip not found, clear saved state and go to dashboard
-          localStorage.removeItem('selectedTripId');
-          localStorage.setItem('currentView', 'dashboard');
+          // Trip not found, go to dashboard
+          setRouteHash('dashboard');
+          setCurrentView('dashboard');
+          setSelectedTrip(null);
+        }
+      } else if (!route.tripId) {
+        setSelectedTrip(null);
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [trips]);
+
+  // Restore selected trip from URL after trips are loaded
+  useEffect(() => {
+    if (trips.length > 0) {
+      const route = getRouteFromHash();
+      if (route.tripId && !selectedTrip) {
+        const trip = trips.find(t => t.id === route.tripId);
+        if (trip) {
+          setSelectedTrip(trip);
+          console.log('Restored trip from URL:', trip.name);
+        } else {
+          // Trip not found, go to dashboard
+          setRouteHash('dashboard');
           setCurrentView('dashboard');
         }
       }
     }
   }, [trips]);
 
-  // Handle browser back button
-  useEffect(() => {
-    const handlePopState = (event) => {
-      if (event.state && event.state.view) {
-        setCurrentView(event.state.view);
-        if (event.state.tripId) {
-          const trip = trips.find(t => t.id === event.state.tripId);
-          setSelectedTrip(trip);
-        } else {
-          setSelectedTrip(null);
-        }
-      } else {
-        setCurrentView('dashboard');
-        setSelectedTrip(null);
-      }
-    };
-
-    window.addEventListener('popstate', handlePopState);
-
-    // Set initial state from saved view
-    if (!window.history.state) {
-      const savedView = localStorage.getItem('currentView') || 'dashboard';
-      const savedTripId = localStorage.getItem('selectedTripId');
-      window.history.replaceState({
-        view: savedView,
-        tripId: savedTripId
-      }, '');
-    }
-
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, [trips]);
+  // Note: Browser back/forward now handled by hashchange listener above
 
   // Load trips when user is authenticated
   useEffect(() => {
@@ -155,7 +159,7 @@ function App() {
       console.log('Trip added successfully:', newTrip);
       setTrips([...trips, newTrip]);
       setCurrentView('dashboard');
-      window.history.pushState({ view: 'dashboard' }, '');
+      setRouteHash('dashboard');
     } catch (error) {
       console.error('Error adding trip:', error);
       console.error('Error details:', error.message, error.code);
@@ -169,7 +173,7 @@ function App() {
       if (updated) {
         setTrips(trips.map(t => t.id === id ? { ...t, ...updated } : t));
         setCurrentView('dashboard');
-        window.history.pushState({ view: 'dashboard' }, '');
+        setRouteHash('dashboard');
       }
     } catch (error) {
       console.error('Error updating trip:', error);
@@ -182,7 +186,7 @@ function App() {
       await deleteTrip(currentUser.uid, id);
       setTrips(trips.filter(t => t.id !== id));
       setCurrentView('dashboard');
-      window.history.pushState({ view: 'dashboard' }, '');
+      setRouteHash('dashboard');
     } catch (error) {
       console.error('Error deleting trip:', error);
       alert('Failed to delete trip. Please try again.');
@@ -203,19 +207,19 @@ function App() {
   const handleViewTrip = (trip) => {
     setSelectedTrip(trip);
     setCurrentView('detail');
-    window.history.pushState({ view: 'detail', tripId: trip.id }, '');
+    setRouteHash('detail', trip.id);
   };
 
   const handleEditTrip = (trip) => {
     setSelectedTrip(trip);
     setCurrentView('edit');
-    window.history.pushState({ view: 'edit', tripId: trip.id }, '');
+    setRouteHash('edit', trip.id);
   };
 
   const handleBackToDashboard = () => {
     setSelectedTrip(null);
     setCurrentView('dashboard');
-    window.history.pushState({ view: 'dashboard' }, '');
+    setRouteHash('dashboard');
   };
 
   const handleCompleteTour = () => {
@@ -273,7 +277,7 @@ function App() {
                 className="btn btn-secondary"
                 onClick={() => {
                   setCurrentView('converter');
-                  window.history.pushState({ view: 'converter' }, '');
+                  setRouteHash('converter');
                 }}
               >
                 💱 Currency Converter
@@ -282,7 +286,7 @@ function App() {
                 className="btn btn-primary"
                 onClick={() => {
                   setCurrentView('add');
-                  window.history.pushState({ view: 'add' }, '');
+                  setRouteHash('add');
                 }}
               >
                 + Add New Trip
@@ -301,7 +305,7 @@ function App() {
             className="btn btn-icon"
             onClick={() => {
               setCurrentView('settings');
-              window.history.pushState({ view: 'settings' }, '');
+              setRouteHash('settings');
             }}
             title="Account Settings"
           >
