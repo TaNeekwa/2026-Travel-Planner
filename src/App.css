@@ -169,11 +169,26 @@
   border-radius: 9999px;
 }
 
-/* Monthly Payments Section */
-.monthly-payments-section {
+/* Side by Side: Payments & Converter Container */
+.payments-converter-container {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 2rem;
   margin-top: 2rem;
   padding-top: 2rem;
   border-top: 2px solid var(--border-color);
+}
+
+@media (max-width: 1024px) {
+  .payments-converter-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Monthly Payments Section */
+.monthly-payments-section {
+  display: flex;
+  flex-direction: column;
 }
 
 .monthly-payments-section h3 {
@@ -182,10 +197,34 @@
   font-size: 1.25rem;
 }
 
-.monthly-payments-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+/* Payment Schedule Carousel */
+.payments-carousel-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.monthly-payments-carousel {
+  display: flex;
   gap: 1.25rem;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 0.5rem 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+}
+
+.monthly-payments-carousel::-webkit-scrollbar {
+  height: 8px;
+}
+
+.monthly-payments-carousel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.monthly-payments-carousel::-webkit-scrollbar-thumb {
+  background-color: var(--border-color);
+  border-radius: 4px;
 }
 
 .monthly-payment-card {
@@ -194,6 +233,8 @@
   border: 1px solid var(--border-color);
   overflow: hidden;
   transition: all 0.2s ease;
+  min-width: 280px;
+  flex-shrink: 0;
 }
 
 .monthly-payment-card:hover {
@@ -232,8 +273,8 @@
 
 .payment-detail-item {
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  justify-content: space-between;
+  align-items: center;
   padding-bottom: 0.75rem;
   border-bottom: 1px solid var(--border-color);
 }
@@ -247,23 +288,14 @@
   font-weight: 600;
   color: var(--text-primary);
   font-size: 0.875rem;
-}
-
-.payment-type-amount {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.payment-type {
-  font-size: 0.8125rem;
-  color: var(--text-secondary);
+  flex: 1;
 }
 
 .payment-amount {
   font-size: 0.9375rem;
   font-weight: 600;
   color: var(--success-color);
+  margin-left: 1rem;
 }
 
 /* Trips Grid */
@@ -1937,6 +1969,45 @@
   color: var(--text-secondary);
   font-size: 0.8125rem;
   line-height: 1.5;
+}
+
+/* Inline Currency Converter */
+.currency-converter-inline {
+  background-color: var(--surface);
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
+}
+
+.currency-converter-inline h3 {
+  margin-bottom: 1.25rem;
+  color: var(--text-primary);
+  font-size: 1.25rem;
+}
+
+.converter-form-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.converter-selects {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.swap-btn {
+  font-size: 1.25rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1.5rem;
 }
 
 /* Photo Gallery */

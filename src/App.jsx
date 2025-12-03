@@ -272,28 +272,17 @@ function App() {
             {darkMode ? '☀️' : '🌙'}
           </button>
           {currentView === 'dashboard' && (
-            <>
-              <button
-                className="btn btn-secondary"
-                onClick={() => {
-                  setCurrentView('converter');
-                  setRouteHash('converter');
-                }}
-              >
-                💱 Currency Converter
-              </button>
-              <button
-                className="btn btn-primary"
-                onClick={() => {
-                  setCurrentView('add');
-                  setRouteHash('add');
-                }}
-              >
-                + Add New Trip
-              </button>
-            </>
+            <button
+              className="btn btn-primary"
+              onClick={() => {
+                setCurrentView('add');
+                setRouteHash('add');
+              }}
+            >
+              + Add New Trip
+            </button>
           )}
-          {(currentView === 'converter' || currentView === 'settings') && (
+          {currentView === 'settings' && (
             <button
               className="btn btn-secondary"
               onClick={handleBackToDashboard}
