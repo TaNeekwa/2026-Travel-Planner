@@ -58,10 +58,18 @@ function App() {
   useEffect(() => {
     if (trips.length > 0 && !selectedTrip) {
       const savedTripId = localStorage.getItem('selectedTripId');
-      if (savedTripId) {
+      const savedView = localStorage.getItem('currentView');
+
+      if (savedTripId && (savedView === 'detail' || savedView === 'edit')) {
         const trip = trips.find(t => t.id === savedTripId);
         if (trip) {
           setSelectedTrip(trip);
+          console.log('Restored trip on refresh:', trip.name);
+        } else {
+          // Trip not found, clear saved state and go to dashboard
+          localStorage.removeItem('selectedTripId');
+          localStorage.setItem('currentView', 'dashboard');
+          setCurrentView('dashboard');
         }
       }
     }
