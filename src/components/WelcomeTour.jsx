@@ -1,23 +1,31 @@
 import { useState } from 'react';
 
-function WelcomeTour({ onComplete }) {
+function WelcomeTour({ onComplete, user }) {
   const [currentStep, setCurrentStep] = useState(0);
+
+  // Extract first name from display name or email
+  const getFirstName = () => {
+    if (user?.displayName) {
+      return user.displayName.split(' ')[0];
+    }
+    if (user?.email) {
+      return user.email.split('@')[0];
+    }
+    return 'Traveler';
+  };
+
+  const firstName = getFirstName();
 
   const steps = [
     {
-      title: 'Welcome to Your Travel Planner!',
+      title: `Welcome to our Travel Planner, ${firstName}!`,
       content: "We're excited to help you plan your adventures! Let's take a quick tour to show you around.",
       icon: '🎉',
     },
     {
       title: 'Create Your First Trip',
-      content: 'Look at the top right corner - click the green "+ Add New Trip" button. Fill in trip name, destination, dates, and costs. You can add as much or as little detail as you want!',
+      content: 'Look at the top right corner - click the green "+ Add New Trip" button, or use the pink floating button in the bottom right corner. Fill in trip name, destination, dates, and costs. You can add as much or as little detail as you want!',
       icon: '✏️',
-    },
-    {
-      title: 'Currency Converter',
-      content: 'Click the "Currency Converter" button in the header to convert between 11 currencies including USD, EUR, GBP, and NGN. Perfect for budgeting international trips!',
-      icon: '💱',
     },
     {
       title: 'Payment Plans',
@@ -30,18 +38,23 @@ function WelcomeTour({ onComplete }) {
       icon: '📅',
     },
     {
-      title: 'Discover on TikTok & Map',
-      content: 'The dashboard shows your trips on a world map! Click any destination marker to instantly explore TikTok travel content - see real videos, tips, and hidden gems! Each trip also shows weather forecasts.',
-      icon: '🎬',
+      title: 'Interactive World Map',
+      content: 'The dashboard shows your trips on a world map with animated markers! Switch between Street, Satellite, Terrain, and Dark map styles. Click any destination to explore TikTok travel content!',
+      icon: '🗺️',
     },
     {
-      title: 'Export & Import',
-      content: 'Using multiple devices? Click "Export Trips" on your computer to download your data, then "Import Trips" on your phone to load them there!',
-      icon: '📲',
+      title: 'Payment Notifications',
+      content: 'Look for the bell icon in the header! It shows a badge with the number of upcoming payments. Click it to see which payments are due this week or this month.',
+      icon: '🔔',
+    },
+    {
+      title: 'Currency Converter & Budget',
+      content: 'Scroll down on the dashboard to find the Budget Overview section. Here you can see your payment schedule and use the built-in currency converter to convert between 11+ currencies!',
+      icon: '💱',
     },
     {
       title: 'Account Settings',
-      content: 'Click the gear icon in the header to update your name, email, or password. Keep your account secure and personalized!',
+      content: 'Click the gear icon in the header to update your name, email, password, or add your phone number for future SMS payment reminders!',
       icon: '⚙️',
     },
     {

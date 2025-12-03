@@ -4,7 +4,6 @@ import TravelStats from './TravelStats';
 import TravelMap from './TravelMap';
 import TripCard from './TripCard';
 import CalendarView from './CalendarView';
-import PaymentNotifications from './PaymentNotifications';
 import { getTripsByStatus } from '../utils/calculations';
 
 function Dashboard({ trips, onViewTrip, onEditTrip, onDeleteTrip, onAddTrip }) {
@@ -94,8 +93,6 @@ function Dashboard({ trips, onViewTrip, onEditTrip, onDeleteTrip, onAddTrip }) {
 
   return (
     <div className="dashboard">
-      <PaymentNotifications trips={trips} />
-
       <div data-aos="fade-up">
         <TravelStats trips={trips} />
       </div>

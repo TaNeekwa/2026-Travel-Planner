@@ -30,6 +30,202 @@
   align-items: center;
 }
 
+/* Notification Bell */
+.notification-bell-container {
+  position: relative;
+}
+
+.notification-bell {
+  position: relative;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background-color: #ef4444;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border: 2px solid var(--surface);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  animation: pulse-badge 2s ease-in-out infinite;
+}
+
+@keyframes pulse-badge {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.notification-dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  width: 380px;
+  max-height: 500px;
+  background-color: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  animation: dropdownSlide 0.2s ease-out;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes dropdownSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.notification-dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--background);
+}
+
+.notification-dropdown-header h4 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.notification-dropdown-header .close-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.notification-dropdown-header .close-btn:hover {
+  background-color: var(--border-color);
+}
+
+.notification-dropdown-content {
+  overflow-y: auto;
+  max-height: 420px;
+  padding: 0.5rem;
+}
+
+.notification-section {
+  margin-bottom: 0.75rem;
+}
+
+.notification-section:last-child {
+  margin-bottom: 0;
+}
+
+.notification-section-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.5rem 0.75rem;
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.notification-section-title.urgent {
+  color: #ef4444;
+}
+
+.notification-section-title.upcoming {
+  color: #3b82f6;
+}
+
+.notification-dropdown .notification-item {
+  padding: 0.875rem 1rem;
+  margin: 0.25rem 0;
+  border-radius: 0.5rem;
+  background-color: var(--background);
+  border-left: 3px solid transparent;
+  transition: all 0.2s;
+}
+
+.notification-dropdown .notification-item.clickable {
+  cursor: pointer;
+}
+
+.notification-dropdown .notification-item:hover {
+  background-color: var(--border-color);
+  transform: translateX(2px);
+}
+
+.notification-dropdown .notification-item.urgent {
+  border-left-color: #ef4444;
+  background: linear-gradient(90deg, rgba(239, 68, 68, 0.05) 0%, var(--background) 100%);
+}
+
+.notification-dropdown .notification-item.upcoming {
+  border-left-color: #3b82f6;
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.05) 0%, var(--background) 100%);
+}
+
+.notification-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+  gap: 1rem;
+}
+
+.notification-item-header strong {
+  color: var(--text-primary);
+  font-size: 0.9375rem;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notification-amount {
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  flex-shrink: 0;
+}
+
+.notification-item-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.notification-dropdown .notification-due {
+  font-weight: 500;
+  font-size: 0.8125rem;
+}
+
 .app-main {
   flex: 1;
   padding: 2rem;
@@ -3057,6 +3253,122 @@
     bottom: 0.5rem;
     right: 0.5rem;
     padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Floating Action Button (FAB) */
+.fab-container {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.fab-button {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  color: white;
+  border: none;
+  font-size: 1.75rem;
+  font-weight: 300;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.fab-button:hover {
+  transform: scale(1.1) rotate(90deg);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.fab-button:active {
+  transform: scale(0.95);
+}
+
+.fab-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  animation: fabMenuSlide 0.3s ease-out;
+}
+
+@keyframes fabMenuSlide {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fab-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1.25rem;
+  background-color: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 2rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  min-width: 160px;
+}
+
+.fab-menu-item:hover {
+  background-color: var(--primary-color);
+  color: white;
+  transform: translateX(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.fab-menu-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.fab-menu-text {
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .fab-container {
+    bottom: 1.5rem;
+    right: 1.5rem;
+  }
+
+  .fab-button {
+    width: 48px;
+    height: 48px;
+    font-size: 1.5rem;
+  }
+
+  .fab-menu-item {
+    min-width: 140px;
+    padding: 0.75rem 1rem;
+  }
+
+  .fab-menu-icon {
+    font-size: 1.1rem;
+  }
+
+  .fab-menu-text {
     font-size: 0.875rem;
   }
 }

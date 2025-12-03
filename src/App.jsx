@@ -11,6 +11,7 @@ import Login from './components/Login';
 import Signup from './components/Signup';
 import { useAuth } from './contexts/AuthContext';
 import { loadTrips, addTrip, updateTrip, deleteTrip } from './utils/firebaseStorage';
+import { formatCurrency, formatDate } from './utils/calculations';
 import './App.css';
 
 // Helper functions for URL-based routing
@@ -54,6 +55,9 @@ function App() {
   });
   const [loading, setLoading] = useState(true);
   const [showWelcomeTour, setShowWelcomeTour] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showFabMenu, setShowFabMenu] = useState(false);
 
   // Initialize AOS (Animate On Scroll)
   useEffect(() => {
@@ -147,6 +151,108 @@ function App() {
     }
     localStorage.setItem('darkMode', darkMode);
   }, [darkMode]);
+
+  // Calculate payment notifications
+  useEffect(() => {
+    const checkPayments = () => {
+      const now = new Date();
+      const oneWeekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+      const alerts = [];
+
+      trips.forEach(trip => {
+        // Check deposit payments
+        if (trip.deposit && parseFloat(trip.deposit) > 0 && trip.depositDueDate && !trip.depositPaid) {
+          const dueDate = new Date(trip.depositDueDate);
+
+          if (dueDate <= oneWeekFromNow && dueDate >= now) {
+            alerts.push({
+              type: 'urgent',
+              tripName: trip.name,
+              amount: parseFloat(trip.deposit),
+              dueDate: trip.depositDueDate,
+              description: 'Deposit',
+              daysUntil: Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24))
+            });
+          } else if (dueDate <= endOfMonth && dueDate >= now) {
+            alerts.push({
+              type: 'upcoming',
+              tripName: trip.name,
+              amount: parseFloat(trip.deposit),
+              dueDate: trip.depositDueDate,
+              description: 'Deposit',
+              daysUntil: Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24))
+            });
+          }
+        }
+
+        // Check monthly payment plan
+        if (trip.monthlyPayments && trip.monthlyPayments.length > 0) {
+          trip.monthlyPayments.forEach(payment => {
+            if (!payment.paid && payment.dueDate) {
+              const dueDate = new Date(payment.dueDate);
+
+              if (dueDate <= oneWeekFromNow && dueDate >= now) {
+                alerts.push({
+                  type: 'urgent',
+                  tripName: trip.name,
+                  amount: parseFloat(payment.amount),
+                  dueDate: payment.dueDate,
+                  description: payment.description || 'Payment',
+                  daysUntil: Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24))
+                });
+              } else if (dueDate <= endOfMonth && dueDate >= now) {
+                alerts.push({
+                  type: 'upcoming',
+                  tripName: trip.name,
+                  amount: parseFloat(payment.amount),
+                  dueDate: payment.dueDate,
+                  description: payment.description || 'Payment',
+                  daysUntil: Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24))
+                });
+              }
+            }
+          });
+        }
+
+        // Check custom payments
+        if (trip.payments && trip.payments.length > 0) {
+          trip.payments.forEach(payment => {
+            if (!payment.paid && payment.dueDate) {
+              const dueDate = new Date(payment.dueDate);
+
+              if (dueDate <= oneWeekFromNow && dueDate >= now) {
+                alerts.push({
+                  type: 'urgent',
+                  tripName: trip.name,
+                  amount: parseFloat(payment.amount),
+                  dueDate: payment.dueDate,
+                  description: payment.description || 'Payment',
+                  daysUntil: Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24))
+                });
+              } else if (dueDate <= endOfMonth && dueDate >= now) {
+                alerts.push({
+                  type: 'upcoming',
+                  tripName: trip.name,
+                  amount: parseFloat(payment.amount),
+                  dueDate: payment.dueDate,
+                  description: payment.description || 'Payment',
+                  daysUntil: Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24))
+                });
+              }
+            }
+          });
+        }
+      });
+
+      // Sort by due date (soonest first)
+      alerts.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+      setNotifications(alerts);
+    };
+
+    checkPayments();
+  }, [trips]);
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
@@ -290,6 +396,93 @@ function App() {
               ← Back to Dashboard
             </button>
           )}
+          <div className="notification-bell-container">
+            <button
+              className="btn btn-icon notification-bell"
+              onClick={() => setShowNotifications(!showNotifications)}
+              title="Payment Notifications"
+            >
+              🔔
+              {notifications.length > 0 && (
+                <span className="notification-badge">{notifications.length}</span>
+              )}
+            </button>
+            {showNotifications && notifications.length > 0 && (
+              <div className="notification-dropdown">
+                <div className="notification-dropdown-header">
+                  <h4>Payment Notifications</h4>
+                  <button
+                    className="close-btn"
+                    onClick={() => setShowNotifications(false)}
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="notification-dropdown-content">
+                  {notifications.filter(n => n.type === 'urgent').length > 0 && (
+                    <div className="notification-section">
+                      <h5 className="notification-section-title urgent">⚠️ Due This Week</h5>
+                      {notifications.filter(n => n.type === 'urgent').map((notif, index) => {
+                        const trip = trips.find(t => t.name === notif.tripName);
+                        return (
+                          <div
+                            key={index}
+                            className="notification-item urgent clickable"
+                            onClick={() => {
+                              if (trip) {
+                                handleViewTrip(trip);
+                                setShowNotifications(false);
+                              }
+                            }}
+                          >
+                            <div className="notification-item-header">
+                              <strong>{notif.tripName}</strong>
+                              <span className="notification-amount">{formatCurrency(notif.amount)}</span>
+                            </div>
+                            <div className="notification-item-details">
+                              <span className="notification-due">
+                                {notif.daysUntil === 0 ? 'Due today' :
+                                 notif.daysUntil === 1 ? 'Due tomorrow' :
+                                 `Due in ${notif.daysUntil} days`}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                  {notifications.filter(n => n.type === 'upcoming').length > 0 && (
+                    <div className="notification-section">
+                      <h5 className="notification-section-title upcoming">📅 This Month</h5>
+                      {notifications.filter(n => n.type === 'upcoming').map((notif, index) => {
+                        const trip = trips.find(t => t.name === notif.tripName);
+                        return (
+                          <div
+                            key={index}
+                            className="notification-item upcoming clickable"
+                            onClick={() => {
+                              if (trip) {
+                                handleViewTrip(trip);
+                                setShowNotifications(false);
+                              }
+                            }}
+                          >
+                            <div className="notification-item-header">
+                              <strong>{notif.tripName}</strong>
+                              <span className="notification-amount">{formatCurrency(notif.amount)}</span>
+                            </div>
+                            <div className="notification-item-details">
+                              <span className="notification-due">Due {formatDate(notif.dueDate)}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
           <button
             className="btn btn-icon"
             onClick={() => {
@@ -347,7 +540,43 @@ function App() {
         )}
       </main>
 
-      {showWelcomeTour && <WelcomeTour onComplete={handleCompleteTour} />}
+      {/* Floating Action Button */}
+      <div className="fab-container">
+        {showFabMenu && (
+          <div className="fab-menu">
+            <button
+              className="fab-menu-item"
+              onClick={() => {
+                setShowWelcomeTour(true);
+                setShowFabMenu(false);
+              }}
+            >
+              <span className="fab-menu-icon">🎓</span>
+              <span className="fab-menu-text">View Tour</span>
+            </button>
+            <button
+              className="fab-menu-item"
+              onClick={() => {
+                setCurrentView('add');
+                setRouteHash('add');
+                setShowFabMenu(false);
+              }}
+            >
+              <span className="fab-menu-icon">✈️</span>
+              <span className="fab-menu-text">Add Trip</span>
+            </button>
+          </div>
+        )}
+        <button
+          className="fab-button"
+          onClick={() => setShowFabMenu(!showFabMenu)}
+          title="Quick Actions"
+        >
+          {showFabMenu ? '✕' : '+'}
+        </button>
+      </div>
+
+      {showWelcomeTour && <WelcomeTour onComplete={handleCompleteTour} user={currentUser} />}
     </div>
   );
 }
