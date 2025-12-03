@@ -76,6 +76,7 @@ function FitBounds({ locations }) {
 function TravelMap({ trips, onMarkerClick, onAddPastTrip }) {
   const locations = getTripLocations(trips);
   const [showModal, setShowModal] = useState(false);
+  const [mapStyle, setMapStyle] = useState('street');
   const [pastTripData, setPastTripData] = useState({
     destination: '',
     startDate: '',
@@ -104,6 +105,30 @@ function TravelMap({ trips, onMarkerClick, onAddPastTrip }) {
   };
 
   const completedTripPath = getCompletedTripLines();
+
+  // Map style configurations
+  const mapStyles = {
+    street: {
+      name: 'Street',
+      url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    },
+    satellite: {
+      name: 'Satellite',
+      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      attribution: '&copy; <a href="https://www.esri.com/">Esri</a>'
+    },
+    terrain: {
+      name: 'Terrain',
+      url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+      attribution: '&copy; <a href="https://opentopomap.org">OpenTopoMap</a> contributors'
+    },
+    dark: {
+      name: 'Dark',
+      url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+      attribution: '&copy; <a href="https://carto.com/">CARTO</a>'
+    }
+  };
 
   const handleInputChange = (e) => {
     setPastTripData({
@@ -147,18 +172,32 @@ function TravelMap({ trips, onMarkerClick, onAddPastTrip }) {
     <div className="travel-map-container">
       <div className="map-header">
         <h3>Your Travel Destinations</h3>
-        <div className="map-legend">
-          <div className="legend-item">
-            <span className="legend-marker" style={{ backgroundColor: '#2563eb' }}></span>
-            <span>Upcoming</span>
+        <div className="map-controls">
+          <div className="map-style-switcher">
+            <label style={{ fontSize: '0.875rem', marginRight: '0.5rem' }}>Map Style:</label>
+            <select
+              value={mapStyle}
+              onChange={(e) => setMapStyle(e.target.value)}
+              className="map-style-select"
+            >
+              {Object.entries(mapStyles).map(([key, style]) => (
+                <option key={key} value={key}>{style.name}</option>
+              ))}
+            </select>
           </div>
-          <div className="legend-item">
-            <span className="legend-marker" style={{ backgroundColor: '#10b981' }}></span>
-            <span>Active</span>
-          </div>
-          <div className="legend-item">
-            <span className="legend-marker" style={{ backgroundColor: '#ff1493' }}></span>
-            <span>Completed</span>
+          <div className="map-legend">
+            <div className="legend-item">
+              <span className="legend-marker" style={{ backgroundColor: '#2563eb' }}></span>
+              <span>Upcoming</span>
+            </div>
+            <div className="legend-item">
+              <span className="legend-marker" style={{ backgroundColor: '#10b981' }}></span>
+              <span>Active</span>
+            </div>
+            <div className="legend-item">
+              <span className="legend-marker" style={{ backgroundColor: '#ff1493' }}></span>
+              <span>Completed</span>
+            </div>
           </div>
         </div>
       </div>
@@ -175,8 +214,9 @@ function TravelMap({ trips, onMarkerClick, onAddPastTrip }) {
           scrollWheelZoom={false}
         >
           <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            key={mapStyle}
+            attribution={mapStyles[mapStyle].attribution}
+            url={mapStyles[mapStyle].url}
           />
 
           {locations.map((location) => (

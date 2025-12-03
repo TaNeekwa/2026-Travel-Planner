@@ -7,7 +7,7 @@ import CalendarView from './CalendarView';
 import { getTripsByStatus } from '../utils/calculations';
 
 function Dashboard({ trips, onViewTrip, onEditTrip, onDeleteTrip, onAddTrip }) {
-  const [filter, setFilter] = useState('active');
+  const [filter, setFilter] = useState('upcoming');
   const [sortBy, setSortBy] = useState('date');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'calendar'
   const [searchQuery, setSearchQuery] = useState('');
