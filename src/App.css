@@ -45,6 +45,82 @@
   gap: 2rem;
 }
 
+/* Payment Notifications */
+.payment-notifications {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.notification-banner {
+  display: flex;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow);
+  animation: slideIn 0.3s ease-out;
+}
+
+.notification-urgent {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border-left: 4px solid #ef4444;
+}
+
+.notification-upcoming {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border-left: 4px solid #3b82f6;
+}
+
+.notification-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.notification-content {
+  flex: 1;
+}
+
+.notification-content h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1.125rem;
+  color: var(--text-primary);
+}
+
+.notification-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.notification-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+  padding: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.6);
+  border-radius: 0.375rem;
+}
+
+.notification-due {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .dashboard-controls {
   display: flex;
   gap: 1.5rem;
@@ -1869,6 +1945,54 @@
 .custom-marker {
   background: transparent;
   border: none;
+}
+
+/* Marker Animations */
+.marker-pulse .marker-pin {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.marker-glow .marker-pin {
+  animation: glow 1.5s ease-in-out infinite;
+}
+
+.marker-static .marker-pin:hover {
+  animation: bounce 0.5s ease;
+}
+
+.custom-marker:hover .marker-pin {
+  animation: bounce 0.5s ease;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: rotate(-45deg) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: rotate(-45deg) scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    transform: rotate(-45deg) scale(1);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3), 0 0 0 0 rgba(16, 185, 129, 0.4);
+  }
+  50% {
+    transform: rotate(-45deg) scale(1.05);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3), 0 0 0 8px rgba(16, 185, 129, 0);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: rotate(-45deg) translateY(0);
+  }
+  50% {
+    transform: rotate(-45deg) translateY(-5px);
+  }
 }
 
 /* Map Popup Styles */

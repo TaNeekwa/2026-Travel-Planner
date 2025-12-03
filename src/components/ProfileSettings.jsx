@@ -11,6 +11,7 @@ function ProfileSettings({ onBack, onLogout }) {
   const [profileData, setProfileData] = useState({
     displayName: currentUser.displayName || '',
     email: currentUser.email || '',
+    phoneNumber: currentUser.phoneNumber || '',
     newPassword: '',
     confirmPassword: '',
     currentPassword: '',
@@ -183,6 +184,19 @@ function ProfileSettings({ onBack, onLogout }) {
                   placeholder="your@email.com"
                 />
                 <small>Used for login and notifications</small>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="phoneNumber">Phone Number (Optional)</label>
+                <input
+                  type="tel"
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  value={profileData.phoneNumber}
+                  onChange={handleChange}
+                  placeholder="+1 (555) 123-4567"
+                />
+                <small>For SMS payment reminders (coming soon!)</small>
               </div>
             </div>
 

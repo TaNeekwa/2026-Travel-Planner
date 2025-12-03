@@ -27,10 +27,15 @@ const createCustomIcon = (status) => {
 
   const color = colors[status] || colors.upcoming;
 
+  // Different animation classes based on status
+  const animationClass = status === 'upcoming' ? 'marker-pulse' :
+                         status === 'active' ? 'marker-glow' :
+                         'marker-static';
+
   return L.divIcon({
-    className: 'custom-marker',
+    className: `custom-marker ${animationClass}`,
     html: `
-      <div style="
+      <div class="marker-pin" style="
         background-color: ${color};
         width: 30px;
         height: 30px;
