@@ -172,15 +172,21 @@
 /* Side by Side: Payments & Converter Container */
 .payments-converter-container {
   display: grid;
-  grid-template-columns: 1.5fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 2rem;
   margin-top: 2rem;
   padding-top: 2rem;
   border-top: 2px solid var(--border-color);
 }
 
+/* When both sections exist, use 60/40 split */
+.payments-converter-container:has(.monthly-payments-section):has(.currency-converter-inline) {
+  grid-template-columns: 1.5fr 1fr;
+}
+
 @media (max-width: 1024px) {
-  .payments-converter-container {
+  .payments-converter-container,
+  .payments-converter-container:has(.monthly-payments-section):has(.currency-converter-inline) {
     grid-template-columns: 1fr;
   }
 }
