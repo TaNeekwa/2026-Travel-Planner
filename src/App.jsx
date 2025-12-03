@@ -12,6 +12,7 @@ import Signup from './components/Signup';
 import { useAuth } from './contexts/AuthContext';
 import { loadTrips, addTrip, updateTrip, deleteTrip } from './utils/firebaseStorage';
 import { formatCurrency, formatDate } from './utils/calculations';
+import { ToastContainer } from './components/Toast';
 import './App.css';
 
 // Helper functions for URL-based routing
@@ -58,6 +59,7 @@ function App() {
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showFabMenu, setShowFabMenu] = useState(false);
+  const [toasts, setToasts] = useState([]);
 
   // Initialize AOS (Animate On Scroll)
   useEffect(() => {
@@ -258,6 +260,16 @@ function App() {
     setDarkMode(!darkMode);
   };
 
+  // Toast notification functions
+  const showToast = (message, type = 'info', duration = 3000) => {
+    const id = Date.now();
+    setToasts((prev) => [...prev, { id, message, type, duration }]);
+  };
+
+  const removeToast = (id) => {
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
+  };
+
   const handleAddTrip = async (tripData) => {
     try {
       console.log('Adding trip:', tripData);
@@ -266,10 +278,11 @@ function App() {
       setTrips([...trips, newTrip]);
       setCurrentView('dashboard');
       setRouteHash('dashboard');
+      showToast('Trip added successfully!', 'success');
     } catch (error) {
       console.error('Error adding trip:', error);
       console.error('Error details:', error.message, error.code);
-      alert(`Failed to add trip: ${error.message}. Please check the console for details.`);
+      showToast(`Failed to add trip: ${error.message}`, 'error');
     }
   };
 
@@ -280,10 +293,11 @@ function App() {
         setTrips(trips.map(t => t.id === id ? { ...t, ...updated } : t));
         setCurrentView('dashboard');
         setRouteHash('dashboard');
+        showToast('Trip updated successfully!', 'success');
       }
     } catch (error) {
       console.error('Error updating trip:', error);
-      alert('Failed to update trip. Please try again.');
+      showToast('Failed to update trip. Please try again.', 'error');
     }
   };
 
@@ -293,9 +307,10 @@ function App() {
       setTrips(trips.filter(t => t.id !== id));
       setCurrentView('dashboard');
       setRouteHash('dashboard');
+      showToast('Trip deleted successfully', 'success');
     } catch (error) {
       console.error('Error deleting trip:', error);
-      alert('Failed to delete trip. Please try again.');
+      showToast('Failed to delete trip. Please try again.', 'error');
     }
   };
 
@@ -577,6 +592,9 @@ function App() {
       </div>
 
       {showWelcomeTour && <WelcomeTour onComplete={handleCompleteTour} user={currentUser} />}
+
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} removeToast={removeToast} />
     </div>
   );
 }
