@@ -171,30 +171,37 @@
 
 /* Side by Side: Payments & Converter Container */
 .payments-converter-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  display: flex;
   gap: 2rem;
   margin-top: 2rem;
   padding-top: 2rem;
   border-top: 2px solid var(--border-color);
-}
-
-/* When both sections exist, use 60/40 split */
-.payments-converter-container:has(.monthly-payments-section):has(.currency-converter-inline) {
-  grid-template-columns: 1.5fr 1fr;
-}
-
-@media (max-width: 1024px) {
-  .payments-converter-container,
-  .payments-converter-container:has(.monthly-payments-section):has(.currency-converter-inline) {
-    grid-template-columns: 1fr;
-  }
+  flex-wrap: wrap;
 }
 
 /* Monthly Payments Section */
 .monthly-payments-section {
   display: flex;
   flex-direction: column;
+  flex: 1.5;
+  min-width: 400px;
+}
+
+.currency-converter-inline {
+  flex: 1;
+  min-width: 350px;
+}
+
+@media (max-width: 1024px) {
+  .payments-converter-container {
+    flex-direction: column;
+  }
+
+  .monthly-payments-section,
+  .currency-converter-inline {
+    min-width: 100%;
+    flex: 1;
+  }
 }
 
 .monthly-payments-section h3 {
